@@ -1,0 +1,2 @@
+python-fasthtml>=0.12.33
+faststrap>=0.6.1
