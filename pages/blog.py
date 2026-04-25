@@ -8,7 +8,7 @@ from fasthtml.common import (
     A, Article, Aside, Div, Footer, H1, H2, H3, H4, I, Li, Main,
     Nav, NotStr, P, Section, Small, Span, Strong, Time, Title, Ul,
 )
-from faststrap import Button, Card, Col, Container, Icon, Row, SEO
+from faststrap import Card, Col, Container, EmptyState, Icon, Row, SEO, ToggleGroup
 
 try:
     from ..blog_content import BLOG_CATEGORIES, BLOG_MAP, BLOG_POSTS, BlogPost
@@ -22,37 +22,16 @@ except ImportError:
         DEVELOPER_NAME, DEVELOPER_NAME_SHORT, DEVELOPER_ROLE,
         EMAIL, GITHUB_URL, LINKEDIN_URL, SITE_URL, SOCIAL_LINKS,
     )
+try:
+    from ..components import shared_inner_nav
+except ImportError:
+    from components import shared_inner_nav
 
 
 # ── Shared nav (pages have a simpler top bar) ─────────────────────────────────
 
 def _page_nav(current: str = "") -> Nav:
-    links = [
-        ("Home",    "/"),
-        ("Blog",    "/blog"),
-        ("CV",      "/cv"),
-        ("Book",    "/book"),
-        ("Contact", "/#contact"),
-    ]
-    return Nav(
-        Container(
-            Div(
-                A(DEVELOPER_NAME_SHORT, href="/", cls="brand-mark"),
-                Div(
-                    *[
-                        A(label, href=href,
-                          cls=f"nav-link-item{'  active' if href == current else ''}")
-                        for label, href in links
-                    ],
-                    cls="site-nav-links",
-                ),
-                A("Book a Call", href="/book", cls="btn talk-button ms-3"),
-                cls="site-nav-shell",
-            ),
-        ),
-        id="site-nav",
-        cls="site-nav",
-    )
+    return shared_inner_nav(current)
 
 
 def _page_footer() -> Footer:
@@ -121,7 +100,7 @@ def blog_card(post: BlogPost, featured: bool = False) -> Col:
             href=f"/blog/{post.slug}",
             cls="blog-card-link",
         ),
-        cols=12, md=6, lg=4,
+        span=12, md=6, lg=4,
     )
 
 
@@ -134,13 +113,10 @@ def blog_index_page(active_category: str = "all") -> tuple[Any, ...]:
     )
 
     cat_buttons = [
-        A(
-            label,
-            href=f"/blog?cat={slug}",
-            cls=f"btn blog-filter-btn{'  active' if slug == active_category else ''}",
-        )
+        A(label, href=f"/blog?cat={slug}", cls="btn blog-filter-btn")
         for slug, label in BLOG_CATEGORIES
     ]
+    active_index = next((i for i, (slug, _) in enumerate(BLOG_CATEGORIES) if slug == active_category), 0)
 
     featured = next((p for p in filtered if p.category == "project"), filtered[0]) if filtered else None
 
@@ -171,13 +147,20 @@ def blog_index_page(active_category: str = "all") -> tuple[Any, ...]:
                         ),
                         cls="blog-index-header text-center mb-5",
                     ),
-                    Div(*cat_buttons, cls="blog-filter-row d-flex gap-2 flex-wrap justify-content-center mb-5"),
+                    ToggleGroup(
+                        *cat_buttons,
+                        values=[slug for slug, _ in BLOG_CATEGORIES],
+                        active_index=active_index,
+                        active_cls="active",
+                        hidden_input=False,
+                        cls="blog-filter-group flex-wrap justify-content-center mb-5",
+                    ),
                     (
                         Row(*cards, cls="g-4")
                         if filtered
-                        else Div(
-                            H3("No posts in this category yet.", cls="text-center"),
-                            P("Try another filter.", cls="text-center text-muted"),
+                        else EmptyState(
+                            title="No posts in this category yet.",
+                            description="Try another filter.",
                             cls="py-5",
                         )
                     ),
@@ -200,11 +183,14 @@ def blog_post_page(slug: str) -> tuple[Any, ...]:
             _page_nav("/blog"),
             Main(
                 Container(
+                    EmptyState(
+                        title="Post not found",
+                        description="This article doesn't exist yet, or the link is outdated.",
+                        cls="py-5",
+                    ),
                     Div(
-                        H1("Post Not Found", cls="text-center mt-5"),
-                        P("This article doesn't exist (yet).", cls="text-center text-muted"),
                         A("← Back to Blog", href="/blog", cls="btn hero-secondary-btn mt-3 d-block mx-auto"),
-                        cls="py-5 text-center",
+                        cls="text-center",
                         style="max-width:600px;margin:0 auto;",
                     ),
                 ),
@@ -293,7 +279,7 @@ def blog_post_page(slug: str) -> tuple[Any, ...]:
                                 NotStr(post.content_html),
                                 cls="post-body",
                             ),
-                            cols=12, lg=8,
+                            span=12, lg=8,
                         ),
                         Col(
                             Div(
@@ -345,7 +331,7 @@ def blog_post_page(slug: str) -> tuple[Any, ...]:
                                 cls="post-sidebar sticky-top",
                                 style="top:90px;",
                             ),
-                            cols=12, lg=4,
+                            span=12, lg=4,
                             cls="mt-4 mt-lg-0",
                         ),
                         cls="g-4 mt-0",

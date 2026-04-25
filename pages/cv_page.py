@@ -9,7 +9,7 @@ from fasthtml.common import (
     P, Section, Small, Span, Strong, Td, Th, Tr, Table,
     Tbody, Thead, Ul, Script
 )
-from faststrap import Button, Card, Col, Container, Icon, PageMeta, Row, SEO
+from faststrap import Badge, Button, Card, Col, Container, Icon, PageMeta, Progress, Row, SEO
 import json
 
 try:
@@ -30,32 +30,14 @@ except ImportError:
         CERTIFICATIONS, COMPETENCIES, CORE_SKILLS, CV_META,
         EDUCATION, LANGUAGES, TOOLS_GRID, WORK_HISTORY,
     )
+try:
+    from ..components import shared_inner_nav
+except ImportError:
+    from components import shared_inner_nav
 
 
 def _cv_nav() -> Nav:
-    return Nav(
-        Container(
-            Div(
-                A(DEVELOPER_NAME_SHORT, href="/", cls="brand-mark"),
-                Div(
-                    A("Home",    href="/",       cls="nav-link-item"),
-                    A("Blog",    href="/blog",   cls="nav-link-item"),
-                    A("CV",      href="/cv",     cls="nav-link-item active"),
-                    A("Book",    href="/book",   cls="nav-link-item"),
-                    A("Contact", href="/#contact", cls="nav-link-item"),
-                    cls="site-nav-links",
-                ),
-                Div(
-                    A(Icon("download"), " Download PDF", href="/resume/download/pdf",
-                      cls="btn hero-primary-btn btn-sm"),
-                    A("Book a Call", href="/book", cls="btn talk-button ms-2"),
-                    cls="nav-action-row d-flex gap-2",
-                ),
-                cls="site-nav-shell",
-            ),
-        ),
-        id="site-nav", cls="site-nav",
-    )
+    return shared_inner_nav("/cv", include_download=True)
 
 
 def _work_item(item: Any) -> Div:
@@ -94,7 +76,7 @@ def _tool_category(cat: Any) -> Div:
     return Div(
         H4(cat.label, cls="cv-tool-category"),
         Div(
-            *[Span(tool, cls="cv-tool-pill") for tool in cat.tools],
+            *[Badge(tool, cls="cv-tool-badge") for tool in cat.tools],
             cls="cv-tool-pills",
         ),
         cls="cv-tool-block reveal-block",
@@ -139,15 +121,23 @@ def cv_page() -> tuple[Any, ...]:
                         H1(DEVELOPER_NAME, cls="cv-header-name"),
                         P(DEVELOPER_ROLE, cls="cv-header-role"),
                         Div(
-                            Span(Icon("geo-alt", cls="me-1"), LOCATION,    cls="cv-contact-chip"),
-                            Span(Icon("telephone", cls="me-1"), PHONE,     cls="cv-contact-chip"),
-                            Span(Icon("envelope", cls="me-1"), EMAIL,      cls="cv-contact-chip"),
-                            A(Icon("github", cls="me-1"), "GitHub",
-                              href=GITHUB_URL, target="_blank", rel="noreferrer",
-                              cls="cv-contact-chip cv-contact-link"),
-                            A(Icon("linkedin", cls="me-1"), "LinkedIn",
-                              href=LINKEDIN_URL, target="_blank", rel="noreferrer",
-                              cls="cv-contact-chip cv-contact-link"),
+                            Badge(Icon("geo-alt", cls="me-1"), LOCATION, cls="cv-contact-chip"),
+                            Badge(Icon("telephone", cls="me-1"), PHONE, cls="cv-contact-chip"),
+                            Badge(Icon("envelope", cls="me-1"), EMAIL, cls="cv-contact-chip"),
+                            A(
+                                Badge(Icon("github", cls="me-1"), "GitHub", cls="cv-contact-chip"),
+                                href=GITHUB_URL,
+                                target="_blank",
+                                rel="noreferrer",
+                                cls="cv-contact-link",
+                            ),
+                            A(
+                                Badge(Icon("linkedin", cls="me-1"), "LinkedIn", cls="cv-contact-chip"),
+                                href=LINKEDIN_URL,
+                                target="_blank",
+                                rel="noreferrer",
+                                cls="cv-contact-link",
+                            ),
                             cls="cv-contact-grid mt-4",
                         ),
                         Div(
@@ -193,64 +183,68 @@ def cv_page() -> tuple[Any, ...]:
                                 cls="cv-section mb-5",
                             ),
 
-                            # Education
-                            Div(
-                                H2("Education", cls="cv-section-title"),
-                                Div(
-                                    *[
+                            Row(
+                                Col(
+                                    Div(
+                                        H2("Education", cls="cv-section-title"),
                                         Div(
-                                            Div(cls="cv-timeline-dot cv-timeline-dot-edu"),
-                                            Div(
-                                                H3(edu.degree, cls="cv-role-title"),
-                                                P(edu.institution, cls="cv-org-line"),
-                                                Span(edu.period, cls="cv-period-pill"),
-                                                P(edu.note, cls="cv-edu-note mt-2"),
-                                                cls="cv-work-body reveal-block",
-                                            ),
-                                            cls="cv-timeline-entry",
-                                        )
-                                        for edu in EDUCATION
-                                    ],
-                                    cls="cv-timeline",
-                                ),
-                                cls="cv-section mb-5",
-                            ),
-
-                            # Tools & Technologies
-                            Div(
-                                H2("Tools & Technologies", cls="cv-section-title"),
-                                Div(
-                                    *[_tool_category(cat) for cat in TOOLS_GRID],
-                                    cls="cv-tools-grid",
-                                ),
-                                cls="cv-section mb-5",
-                            ),
-
-                            # Certifications
-                            Div(
-                                H2("Certifications", cls="cv-section-title"),
-                                Div(
-                                    *[
+                                            *[
+                                                Div(
+                                                    Div(cls="cv-timeline-dot cv-timeline-dot-edu"),
+                                                    Div(
+                                                        H3(edu.degree, cls="cv-role-title"),
+                                                        P(edu.institution, cls="cv-org-line"),
+                                                        Span(edu.period, cls="cv-period-pill"),
+                                                        P(edu.note, cls="cv-edu-note mt-2"),
+                                                        cls="cv-work-body reveal-block",
+                                                    ),
+                                                    cls="cv-timeline-entry",
+                                                )
+                                                for edu in EDUCATION
+                                            ],
+                                            cls="cv-timeline",
+                                        ),
+                                        cls="cv-section mb-4",
+                                    ),
+                                    Div(
+                                        H2("Certifications", cls="cv-section-title"),
                                         Div(
-                                            Div(
-                                                Icon("award", cls="cv-cert-icon"),
-                                                cls="cv-cert-icon-box",
-                                            ),
-                                            Div(
-                                                Strong(cert.name),
-                                                P(f"{cert.issuer} · {cert.year}", cls="small text-muted mb-0"),
-                                                cls="",
-                                            ),
-                                            cls="cv-cert-row reveal-block",
-                                        )
-                                        for cert in CERTIFICATIONS
-                                    ],
-                                    cls="cv-cert-list",
+                                            *[
+                                                Div(
+                                                    Div(
+                                                        Icon("award", cls="cv-cert-icon"),
+                                                        cls="cv-cert-icon-box",
+                                                    ),
+                                                    Div(
+                                                        Strong(cert.name),
+                                                        P(f"{cert.issuer} · {cert.year}", cls="small text-muted mb-0"),
+                                                        cls="",
+                                                    ),
+                                                    cls="cv-cert-row reveal-block",
+                                                )
+                                                for cert in CERTIFICATIONS
+                                            ],
+                                            cls="cv-cert-list",
+                                        ),
+                                        cls="cv-section",
+                                    ),
+                                    span=12, lg=7,
                                 ),
-                                cls="cv-section",
+                                Col(
+                                    Div(
+                                        H2("Tools & Technologies", cls="cv-section-title"),
+                                        Div(
+                                            *[_tool_category(cat) for cat in TOOLS_GRID],
+                                            cls="cv-tools-grid",
+                                        ),
+                                        cls="cv-section",
+                                    ),
+                                    span=12, lg=5, cls="mt-4 mt-lg-0",
+                                ),
+                                cls="g-4 mb-5",
                             ),
 
-                            cols=12, lg=8,
+                            span=12, lg=8,
                         ),
 
                         # Right sidebar — skills + meta
@@ -270,7 +264,7 @@ def cv_page() -> tuple[Any, ...]:
                                 Card(
                                     H3("Competencies", cls="cv-sidebar-title"),
                                     Div(
-                                        *[Span(c, cls="cv-competency-pill") for c in COMPETENCIES],
+                                        *[Badge(c, cls="cv-competency-pill") for c in COMPETENCIES],
                                         cls="d-flex flex-wrap gap-2",
                                     ),
                                     cls="cv-sidebar-card mb-4",
@@ -286,13 +280,7 @@ def cv_page() -> tuple[Any, ...]:
                                                 Span(level, cls="small text-muted"),
                                                 cls="d-flex justify-content-between mb-1",
                                             ),
-                                            Div(
-                                                Div(
-                                                    cls="skill-progress-fill",
-                                                    style=f"width:{pct}%;",
-                                                ),
-                                                cls="skill-progress-track",
-                                            ),
+                                            Progress(pct, cls="skill-progress-track"),
                                             cls="mb-3",
                                         )
                                         for lang, level, pct in LANGUAGES
@@ -325,7 +313,7 @@ def cv_page() -> tuple[Any, ...]:
 
                                 cls="cv-sidebar",
                             ),
-                            cols=12, lg=4,
+                            span=12, lg=4,
                             cls="mt-4 mt-lg-0",
                         ),
 

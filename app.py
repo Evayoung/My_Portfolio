@@ -46,7 +46,7 @@ app.hdrs = app.hdrs + [
     # Author
     Meta(name="author", content="Olorundare Micheal Babawale"),
     # Custom stylesheet
-    Link(rel="stylesheet", href="/assets/custom.css?v=20260415"),
+    Link(rel="stylesheet", href="/assets/custom.css?v=20260425c"),
     # Custom JS (deferred)
     Script(src="/assets/custom.js?v=20260415", defer=True),
 ]

@@ -5,7 +5,27 @@ from __future__ import annotations
 from typing import Any
 
 from fasthtml.common import *
-from faststrap import Button, Card, Col, Container, Icon, PageMeta, Row, SEO, ToggleGroup
+from faststrap import (
+    Button,
+    Card,
+    Col,
+    Container,
+    EmptyState,
+    Feature,
+    FeatureGrid,
+    FloatingLabel,
+    Icon,
+    Modal,
+    Navbar,
+    PageMeta,
+    PricingGroup,
+    Progress,
+    Row,
+    SEO,
+    Testimonial,
+    TestimonialSection,
+    ToggleGroup,
+)
 import json
 
 try:
@@ -15,7 +35,6 @@ try:
         HERO_SUMMARY, JOURNEY_PARAGRAPHS, KEYWORDS_GLOBAL, LINKEDIN_URL, LOCATION,
         PHONE, PORTFOLIO_FILTERS, PRICING_TIERS, PROJECTS, ROLE_TITLES, SERVICES,
         SITE_URL, SOCIAL_LINKS, TECHNICAL_SKILLS, TESTIMONIALS, WHATSAPP,
-        FORMSPREE_CONTACT_ID,
     )
 except ImportError:
     from content import (
@@ -24,15 +43,10 @@ except ImportError:
         HERO_SUMMARY, JOURNEY_PARAGRAPHS, KEYWORDS_GLOBAL, LINKEDIN_URL, LOCATION,
         PHONE, PORTFOLIO_FILTERS, PRICING_TIERS, PROJECTS, ROLE_TITLES, SERVICES,
         SITE_URL, SOCIAL_LINKS, TECHNICAL_SKILLS, TESTIMONIALS, WHATSAPP,
-        FORMSPREE_CONTACT_ID,
     )
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
-
-def _nav_link(label: str, href: str) -> A:
-    return A(label, href=href, cls="nav-link-item")
-
 
 def _section_header(title: str, copy: str) -> Div:
     return Div(
@@ -43,9 +57,60 @@ def _section_header(title: str, copy: str) -> Div:
     )
 
 
+def floating_select_field(
+    name: str,
+    label: str,
+    *options: Any,
+    input_id: str,
+    input_cls: str = "contact-input",
+    wrapper_cls: str = "mt-3",
+    **kwargs: Any,
+) -> Div:
+    select_cls = f"form-select {input_cls}".strip()
+    wrapper = "form-floating"
+    if wrapper_cls:
+        wrapper = f"{wrapper} {wrapper_cls}"
+    return Div(
+        Select(*options, id=input_id, name=name, cls=select_cls, aria_label=label, **kwargs),
+        Label(label, fr=input_id),
+        cls=wrapper,
+    )
+
+
+def floating_textarea_field(
+    name: str,
+    label: str,
+    *,
+    input_id: str,
+    placeholder: str = "",
+    rows: int = 6,
+    required: bool = False,
+    input_cls: str = "contact-input contact-textarea",
+    wrapper_cls: str = "mt-3",
+    **kwargs: Any,
+) -> Div:
+    textarea_cls = f"form-control {input_cls}".strip()
+    wrapper = "form-floating"
+    if wrapper_cls:
+        wrapper = f"{wrapper} {wrapper_cls}"
+    return Div(
+        Textarea(
+            id=input_id,
+            name=name,
+            placeholder=placeholder or label,
+            rows=rows,
+            cls=textarea_cls,
+            required=required,
+            **kwargs,
+        ),
+        Label(label, fr=input_id),
+        cls=wrapper,
+    )
+
+
 def _social_icon(icon: str, href: str, label: str, color: str) -> A:
     icon_name = {"linkedin": "linkedin", "envelope": "envelope", "email": "envelope"}.get(icon, icon)
-    return A(
+    return Div(
         Icon(icon_name, cls="social-icon-glyph"),
         href=href,
         target="_blank" if href.startswith("http") else None,
@@ -64,10 +129,7 @@ def _skill_row(skill: Any) -> Div:
             Span(skill.badge, cls="skill-badge"),
             cls="skill-row-top",
         ),
-        Div(
-            Div(cls="skill-progress-fill", style=f"width:{skill.score}%;"),
-            cls="skill-progress-track",
-        ),
+        Progress(skill.score, cls="skill-progress-track", height="0.6rem"),
         cls="skill-row reveal-block",
     )
 
@@ -86,51 +148,13 @@ def _experience_item(item: Any) -> Div:
     )
 
 
-def _stat_card(stat: Any) -> Card:
-    return Card(
-        Div(H3(stat.value, cls="stat-value"), P(stat.label, cls="stat-label"), cls="stat-card-inner"),
-        cls="about-stat-card reveal-block",
-    )
-
-
-def _service_card(service: Any) -> Col:
+def _stat_card(stat: Any) -> Col:
     return Col(
         Card(
-            Div(Icon(service.icon, cls="service-symbol"), cls="service-icon-box"),
-            H3(service.title, cls="service-title"),
-            P(service.summary, cls="service-summary"),
-            Div(
-                Button(
-                    "Open Details",
-                    type="button",
-                    cls="btn service-action-btn",
-                    data_bs_toggle="modal",
-                    data_bs_target="#serviceModal",
-                    hx_get=f"/service-detail?slug={service.slug}",
-                    hx_target="#service-detail-body",
-                    hx_swap="innerHTML",
-                ),
-                cls="mt-4",
-            ),
-            cls="service-card h-100 reveal-block",
+            Div(H3(stat.value, cls="stat-value"), P(stat.label, cls="stat-label"), cls="stat-card-inner"),
+            cls="about-stat-card h-100 reveal-block",
         ),
-        span=12, md=6,
-    )
-
-
-def _pricing_card(tier: Any) -> Col:
-    return Col(
-        Div(
-            Div(
-                H3(tier.title, cls="pricing-title"),
-                P(tier.price, cls="pricing-price"),
-                P(tier.highlight, cls="pricing-highlight"),
-                Div(*[P(point, cls="pricing-point") for point in tier.points], cls="pricing-points"),
-                cls="pricing-card-face",
-            ),
-            cls="pricing-card reveal-block",
-        ),
-        span=12, md=4,
+        span=6,
     )
 
 
@@ -222,21 +246,6 @@ def _project_card(project: Any, span: str) -> Col:
     )
 
 
-def _testimonial_slide(item: Any, active: bool) -> Div:
-    return Div(
-        Card(
-            P(f'"{item.quote}"', cls="testimonial-quote"),
-            Div(
-                H4(item.author, cls="testimonial-author"),
-                P(f"{item.role} | {item.company}", cls="testimonial-role"),
-                cls="testimonial-meta",
-            ),
-            cls="testimonial-card",
-        ),
-        cls=f"carousel-item {'active' if active else ''}",
-    )
-
-
 def _resume_metrics(downloads: dict[str, int]) -> Div:
     return Div(
         Div(Span("PDF", cls="analytics-key"), Span(str(downloads["pdf"]), cls="analytics-value"), cls="analytics-row"),
@@ -250,21 +259,16 @@ def _resume_metrics(downloads: dict[str, int]) -> Div:
 # ── Portfolio grid and controls ───────────────────────────────────────────────
 
 def portfolio_grid(active_filter: str) -> Div:
-    VALID = {"all", "full-stack", "frontend", "ai-ml", "devops", "mobile",
-             "blockchain", "security", "desktop", "web"}
     items = PROJECTS if active_filter == "all" else tuple(
         p for p in PROJECTS if p.category == active_filter
     )
     spans = ("wide", "tall", "wide", "tall", "small", "large", "wide", "tall", "small", "large", "wide", "tall")
     if not items:
         return Div(
-            Card(
-                Div(
-                    H3("No projects in this category yet.", cls="portfolio-empty-title"),
-                    P("Try another filter to explore the rest of the work.", cls="portfolio-empty-copy"),
-                    cls="portfolio-empty-state",
-                ),
-                cls="project-card",
+            EmptyState(
+                title="No projects in this category yet.",
+                description="Try another filter to explore the rest of the work.",
+                cls="project-card portfolio-empty-card py-5",
             ),
             id="portfolio-grid",
             cls="portfolio-grid-shell",
@@ -307,60 +311,89 @@ def portfolio_controls(active_filter: str) -> Div:
 
 # ── Navigation ────────────────────────────────────────────────────────────────
 
-def _mo_logo() -> A:
+def _mo_logo() -> Div:
     """Stylised 'MO' monogram logo mark."""
     return A(
         Span("M", cls="mo-logo-m"),
         Span("O", cls="mo-logo-o"),
-        href="#hero",
         cls="mo-logo",
         aria_label="MO — Home",
     )
 
 
-def site_nav() -> Nav:
-    """Glass navbar built with plain Bootstrap markup so collapse works reliably."""
-    toggler_target = "neoNavbarContent"
+def _shared_nav(
+    current: str = "",
+    *,
+    home: bool = False,
+    include_download: bool = False,
+    always_visible: bool = False,
+) -> Nav:
+    links = (
+        [
+            ("Home", "#hero"),
+            ("About", "#about"),
+            ("Services", "#services"),
+            ("Portfolio", "#portfolio"),
+            ("Blog", "/blog"),
+            ("CV", "/cv"),
+            ("Contact", "#contact"),
+        ]
+        if home
+        else [
+            ("Home", "/"),
+            ("Blog", "/blog"),
+            ("CV", "/cv"),
+            ("Book", "/book"),
+            ("Contact", "/#contact"),
+        ]
+    )
+
     nav_links = Div(
-        _nav_link("Home",      "#hero"),
-        _nav_link("About",     "#about"),
-        _nav_link("Services",  "#services"),
-        _nav_link("Portfolio", "#portfolio"),
-        _nav_link("Blog",      "/blog"),
-        _nav_link("CV",        "/cv"),
-        _nav_link("Contact",   "#contact"),
+        *[
+            A(
+                label,
+                href=href,
+                cls=f"nav-link-item{' active' if current and href == current else ''}",
+            )
+            for label, href in links
+        ],
         cls="navbar-nav neo-nav-links ms-auto align-items-lg-center",
     )
-    return Nav(
-        Div(
-            # Brand
-            _mo_logo(),
-            # Mobile toggler
-            Button(
-                Span(cls="navbar-toggler-icon"),
-                cls="navbar-toggler",
-                type="button",
-                data_bs_toggle="collapse",
-                data_bs_target=f"#{toggler_target}",
-                aria_controls=toggler_target,
-                aria_expanded="false",
-                aria_label="Toggle navigation",
-            ),
-            # Collapsible content
-            Div(
-                nav_links,
-                Div(
-                    A("Book a Call", href="/book", cls="btn talk-button ms-lg-3 mt-3 mt-lg-0"),
-                    cls="d-flex align-items-center",
-                ),
-                cls="collapse navbar-collapse",
-                id=toggler_target,
-            ),
-            cls="container",
-        ),
+
+    actions: list[Any] = []
+    if include_download:
+        actions.append(
+            A(
+                Icon("download", cls="me-2"),
+                "Download PDF",
+                href="/resume/download/pdf",
+                cls="btn hero-primary-btn btn-sm d-none d-lg-inline-flex",
+            )
+        )
+    actions.append(A("Book a Call", href="/book", cls="btn talk-button"))
+
+    nav_cls = "neo-glass-nav"
+    if always_visible:
+        nav_cls += " is-always-visible"
+
+    return Navbar(
+        nav_links,
+        Div(*actions, cls="d-flex align-items-center gap-2 flex-wrap ms-lg-3 mt-3 mt-lg-0"),
+        brand=_mo_logo() if home else Span(DEVELOPER_NAME_SHORT, cls="brand-mark"),
+        brand_href="#hero" if home else "/",
+        variant="dark",
+        expand="lg",
         id="site-nav",
-        cls="neo-glass-nav navbar navbar-expand-lg navbar-dark",
+        cls=nav_cls,
     )
+
+
+def site_nav() -> Nav:
+    return _shared_nav(home=True)
+
+
+def shared_inner_nav(current: str = "", *, include_download: bool = False) -> Nav:
+    return _shared_nav(current, include_download=include_download, always_visible=True)
 
 
 # Exported alias used by blog/cv/booking pages
@@ -479,7 +512,7 @@ def about_section() -> Section:
                             Div(*[_skill_row(skill) for skill in TECHNICAL_SKILLS], cls="skills-list"),
                             cls="about-panel skills-panel reveal-block",
                         ),
-                        Div(*[_stat_card(stat) for stat in ABOUT_STATS], cls="about-stats-grid"),
+                        Row(*[_stat_card(stat) for stat in ABOUT_STATS], cls="g-3 about-stats-row"),
                         cls="about-right-column",
                     ),
                     span=12, lg=6, cls="mt-4 mt-lg-0",
@@ -499,32 +532,91 @@ def services_section() -> Section:
         ("Build",    "Implement with clear milestones, quality checks, and polish."),
         ("Launch",   "Ship with metrics, fixes, and room to evolve safely."),
     )
+    service_cards = [
+        Card(
+            Div(
+                Div(
+                    Feature(
+                        service.title,
+                        service.summary,
+                        icon=service.icon,
+                        icon_cls="service-icon-box service-symbol",
+                        icon_wrapper_cls="service-icon-box",
+                        title_cls="service-title",
+                        description_cls="service-summary mb-0",
+                    ),
+                    cls="service-feature-block",
+                ),
+                P(service.lead, cls="service-lead-copy"),
+                Button(
+                    "Open Details",
+                    type="button",
+                    cls="btn service-action-btn mt-4",
+                    data_bs_toggle="modal",
+                    data_bs_target="#serviceModal",
+                    hx_get=f"/service-detail?slug={service.slug}",
+                    hx_target="#service-detail-body",
+                    hx_swap="innerHTML",
+                ),
+                cls="h-100 d-flex flex-column",
+            ),
+            cls="service-card h-100 reveal-block",
+        )
+        for service in SERVICES
+    ]
+    pricing_cards = [
+        Card(
+            Div(
+                H3(tier.title, cls="pricing-title"),
+                P(tier.price, cls="pricing-price"),
+                P(tier.highlight, cls="pricing-highlight"),
+                Ul(*[Li(point, cls="pricing-point") for point in tier.points], cls="list-unstyled pricing-points"),
+                A(
+                    "Book a Consultation",
+                    href="/book",
+                    cls=f"btn {'hero-primary-btn' if index == 1 else 'hero-secondary-btn'} mt-4 w-100",
+                ),
+                cls="pricing-card-face",
+            ),
+            cls=f"pricing-card h-100 reveal-block{' pricing-card-featured' if index == 1 else ''}",
+        )
+        for index, tier in enumerate(PRICING_TIERS)
+    ]
     return Section(
         Container(
             _section_header(
                 "My Services",
                 "Full-stack, AI, and consulting services for serious products — built in Python, shipped on time.",
             ),
-            Row(*[_service_card(service) for service in SERVICES], cls="g-4"),
+            FeatureGrid(*service_cards, columns=2, row_cls="g-4 services-grid-row"),
             Div(
                 H3("How I Work", cls="subsection-title text-center"),
-                Div(
+                Row(
                     *[
-                        Div(
-                            Span(f"0{index}", cls="process-index"),
-                            H4(title, cls="process-title"),
-                            P(copy, cls="process-copy"),
-                            cls="process-node reveal-block",
+                        Col(
+                            Div(
+                                Span(f"0{index}", cls="process-index"),
+                                H4(title, cls="process-title"),
+                                P(copy, cls="process-copy"),
+                                cls="process-node reveal-block h-100",
+                            ),
+                            span=12, sm=6, lg=3,
                         )
                         for index, (title, copy) in enumerate(flow, start=1)
                     ],
-                    cls="process-flow",
+                    cls="g-3 process-flow-row",
                 ),
                 cls="services-process-wrap",
             ),
             Div(
-                H3("Engagement Options", cls="subsection-title text-center"),
-                Row(*[_pricing_card(tier) for tier in PRICING_TIERS], cls="g-4"),
+                PricingGroup(
+                    *pricing_cards,
+                    title="Engagement Options",
+                    subtitle="Flexible collaboration models depending on scope, urgency, and how hands-on you need me to be.",
+                    title_cls="subsection-title text-center",
+                    subtitle_cls="section-copy text-center mx-auto",
+                    row_cls="g-4",
+                ),
                 cls="pricing-section-wrap",
             ),
         ),
@@ -551,24 +643,30 @@ def portfolio_section(active_filter: str) -> Section:
     )
 
 
-def testimonials_section() -> Section:
-    slides = [_testimonial_slide(item, index == 0) for index, item in enumerate(TESTIMONIALS)]
+def testimonials_section() -> Div:
     return Section(
-        Container(
-            _section_header("Testimonials", "From people I've built things with."),
-            Div(
-                Div(*slides, cls="carousel-inner"),
-                Button("", cls="carousel-control-prev", type="button",
-                       data_bs_target="#testimonialCarousel", data_bs_slide="prev", aria_label="Previous"),
-                Button("", cls="carousel-control-next", type="button",
-                       data_bs_target="#testimonialCarousel", data_bs_slide="next", aria_label="Next"),
-                id="testimonialCarousel",
-                cls="carousel slide testimonial-carousel reveal-block",
-                data_bs_ride="carousel",
+        Div(
+            TestimonialSection(
+                *[
+                    Testimonial(
+                        quote=item.quote,
+                        author=item.author,
+                        role=f"{item.role} | {item.company}",
+                        rating=5,
+                        cls="testimonial-card reveal-block",
+                    )
+                    for item in TESTIMONIALS
+                ],
+                title="Testimonials",
+                subtitle="From people I've built things with.",
+                columns=3,
+                title_cls="section-title",
+                subtitle_cls="section-copy text-center mx-auto",
+                row_cls="g-4",
+                id="testimonials",
             ),
+            cls="content-section testimonials-section",
         ),
-        id="testimonials",
-        cls="content-section testimonials-section",
     )
 
 
@@ -652,40 +750,46 @@ def contact_section() -> Section:
     ]
     socials = [_social_icon(icon, href, label, color) for icon, href, label, color in SOCIAL_LINKS]
     form = Form(
-        Div(
-            Input(id="contact-name", name="name", placeholder="John Doe",
-                  cls="form-control contact-input", required=True),
-            Label("Full Name", fr="contact-name", cls="contact-floating-label"),
-            cls="contact-floating-field",
+        FloatingLabel(
+            "name",
+            label="Full Name",
+            placeholder="John Doe",
+            required=True,
+            input_id="contact-name",
+            input_cls="contact-input",
         ),
         Row(
             Col(
-                Div(
-                    Input(id="contact-email", name="email", type="email",
-                          placeholder="hello@example.com",
-                          cls="form-control contact-input", required=True),
-                    Label("Email Address", fr="contact-email", cls="contact-floating-label"),
-                    cls="contact-floating-field",
+                FloatingLabel(
+                    "email",
+                    label="Email Address",
+                    input_type="email",
+                    placeholder="hello@example.com",
+                    required=True,
+                    input_id="contact-email",
+                    input_cls="contact-input",
                 ),
                 span=12, md=6,
             ),
             Col(
-                Div(
-                    Input(id="contact-subject", name="subject", placeholder="Project Discussion",
-                          cls="form-control contact-input"),
-                    Label("Subject", fr="contact-subject", cls="contact-floating-label"),
-                    cls="contact-floating-field",
+                FloatingLabel(
+                    "subject",
+                    label="Subject",
+                    placeholder="Project Discussion",
+                    input_id="contact-subject",
+                    input_cls="contact-input",
                 ),
                 span=12, md=6, cls="mt-3 mt-md-0",
             ),
             cls="g-3 mt-1",
         ),
-        Div(
-            Textarea(id="contact-message", name="message",
-                     placeholder="Tell me about your project...", rows=6,
-                     cls="form-control contact-input contact-textarea", required=True),
-            Label("Message", fr="contact-message", cls="contact-floating-label"),
-            cls="contact-floating-field mt-3",
+        floating_textarea_field(
+            "message",
+            "Message",
+            input_id="contact-message",
+            placeholder="Tell me about your project...",
+            rows=6,
+            required=True,
         ),
         Button(
             Icon("send", cls="contact-submit-icon"),
@@ -755,67 +859,42 @@ def footer() -> Footer:
 # ── Modals ────────────────────────────────────────────────────────────────────
 
 def service_modal() -> Div:
-    return Div(
-        Div(
-            Div(
-                Div(
-                    Button("", type="button", cls="btn-close btn-close-white",
-                           data_bs_dismiss="modal", aria_label="Close"),
-                    cls="modal-header border-0",
-                ),
-                Div(
-                    Div("Select a service to load details.", id="service-detail-body", cls="modal-fragment-shell"),
-                    cls="modal-body",
-                ),
-                cls="modal-content neo-modal-content",
-            ),
-            cls="modal-dialog modal-lg modal-dialog-centered",
-        ),
-        id="serviceModal", cls="modal fade", tabindex="-1", aria_hidden="true",
+    return Modal(
+        Div("Select a service to load details.", id="service-detail-body", cls="modal-fragment-shell"),
+        modal_id="serviceModal",
+        title="Service Details",
+        size="lg",
+        centered=True,
+        content_cls="neo-modal-content",
+        header_cls="border-0",
+        close_cls="btn-close-white",
     )
 
 
 def project_preview_modal() -> Div:
-    return Div(
-        Div(
-            Div(
-                Div(
-                    H3("Project Preview", cls="modal-title"),
-                    Button("", type="button", cls="btn-close btn-close-white",
-                           data_bs_dismiss="modal", aria_label="Close"),
-                    cls="modal-header border-0",
-                ),
-                Div(
-                    Div("Preview will load here.", id="project-preview-body", cls="modal-fragment-shell"),
-                    cls="modal-body",
-                ),
-                cls="modal-content neo-modal-content",
-            ),
-            cls="modal-dialog modal-xl modal-dialog-centered",
-        ),
-        id="projectPreviewModal", cls="modal fade", tabindex="-1", aria_hidden="true",
+    return Modal(
+        Div("Preview will load here.", id="project-preview-body", cls="modal-fragment-shell"),
+        modal_id="projectPreviewModal",
+        title="Project Preview",
+        size="xl",
+        centered=True,
+        content_cls="neo-modal-content",
+        header_cls="border-0",
+        close_cls="btn-close-white",
     )
 
 
 def case_study_modal() -> Div:
-    return Div(
-        Div(
-            Div(
-                Div(
-                    H3("Case Study", cls="modal-title"),
-                    Button("", type="button", cls="btn-close btn-close-white",
-                           data_bs_dismiss="modal", aria_label="Close"),
-                    cls="modal-header border-0",
-                ),
-                Div(
-                    Div("Case study will load here.", id="case-study-body", cls="modal-fragment-shell"),
-                    cls="modal-body",
-                ),
-                cls="modal-content neo-modal-content",
-            ),
-            cls="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable",
-        ),
-        id="caseStudyModal", cls="modal fade", tabindex="-1", aria_hidden="true",
+    return Modal(
+        Div("Case study will load here.", id="case-study-body", cls="modal-fragment-shell"),
+        modal_id="caseStudyModal",
+        title="Case Study",
+        size="xl",
+        centered=True,
+        scrollable=True,
+        content_cls="neo-modal-content",
+        header_cls="border-0",
+        close_cls="btn-close-white",
     )
 
 
@@ -824,21 +903,15 @@ def cv_preview_modal() -> Div:
         Div(H4(title, cls="cv-highlight-title"), P(copy, cls="cv-highlight-copy"), cls="cv-highlight-card")
         for title, copy in CV_HIGHLIGHTS
     ]
-    return Div(
-        Div(
-            Div(
-                Div(
-                    H3("Interactive CV Preview", cls="modal-title"),
-                    Button("", type="button", cls="btn-close btn-close-white",
-                           data_bs_dismiss="modal", aria_label="Close"),
-                    cls="modal-header border-0",
-                ),
-                Div(Div(*cards, cls="cv-preview-grid"), cls="modal-body"),
-                cls="modal-content neo-modal-content",
-            ),
-            cls="modal-dialog modal-lg modal-dialog-centered",
-        ),
-        id="cvPreviewModal", cls="modal fade", tabindex="-1", aria_hidden="true",
+    return Modal(
+        Div(*cards, cls="cv-preview-grid"),
+        modal_id="cvPreviewModal",
+        title="Interactive CV Preview",
+        size="lg",
+        centered=True,
+        content_cls="neo-modal-content",
+        header_cls="border-0",
+        close_cls="btn-close-white",
     )
 
 

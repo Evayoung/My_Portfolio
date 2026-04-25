@@ -5,10 +5,10 @@ from __future__ import annotations
 from typing import Any
 
 from fasthtml.common import (
-    A, Button, Div, Footer, Form, H1, H2, H3, H4, I, Input, Label,
-    Main, Nav, Option, P, Section, Select, Span, Strong, Textarea,
+    A, Button, Div, Footer, Form, H1, H2, H3, H4,
+    Main, Nav, Option, P, Section, Span, Strong,
 )
-from faststrap import Card, Col, Container, Icon, Row, SEO
+from faststrap import Card, Col, Container, FloatingLabel, Icon, Row, SEO
 
 try:
     from ..content import (
@@ -22,27 +22,19 @@ except ImportError:
         FORMSPREE_BOOKING_ID, LOCATION, SITE_URL, WHATSAPP,
         SERVICES,
     )
+try:
+    from ..components import shared_inner_nav
+except ImportError:
+    from components import shared_inner_nav
+
+try:
+    from ..components import floating_select_field, floating_textarea_field
+except ImportError:
+    from components import floating_select_field, floating_textarea_field
 
 
 def _book_nav() -> Nav:
-    return Nav(
-        Container(
-            Div(
-                A(DEVELOPER_NAME_SHORT, href="/", cls="brand-mark"),
-                Div(
-                    A("Home",    href="/",         cls="nav-link-item"),
-                    A("Blog",    href="/blog",     cls="nav-link-item"),
-                    A("CV",      href="/cv",       cls="nav-link-item"),
-                    A("Book",    href="/book",     cls="nav-link-item active"),
-                    A("Contact", href="/#contact", cls="nav-link-item"),
-                    cls="site-nav-links",
-                ),
-                A("Book a Call", href="/book", cls="btn talk-button ms-3"),
-                cls="site-nav-shell",
-            ),
-        ),
-        id="site-nav", cls="site-nav",
-    )
+    return shared_inner_nav("/book")
 
 
 def booking_page() -> tuple[Any, ...]:
@@ -134,7 +126,7 @@ def booking_page() -> tuple[Any, ...]:
                                 P(WHATSAPP, cls="small text-muted mt-2 text-center"),
                                 cls="book-connect-card h-100 reveal-block",
                             ),
-                            cols=12, md=4,
+                            span=12, md=4,
                         ),
                         # Email
                         Col(
@@ -160,7 +152,7 @@ def booking_page() -> tuple[Any, ...]:
                                 P(EMAIL, cls="small text-muted mt-2 text-center"),
                                 cls="book-connect-card h-100 reveal-block",
                             ),
-                            cols=12, md=4,
+                            span=12, md=4,
                         ),
                         # Availability
                         Col(
@@ -190,7 +182,7 @@ def booking_page() -> tuple[Any, ...]:
                                 ),
                                 cls="book-connect-card h-100 reveal-block",
                             ),
-                            cols=12, md=4,
+                            span=12, md=4,
                         ),
                         cls="g-4",
                     ),
@@ -217,36 +209,39 @@ def booking_page() -> tuple[Any, ...]:
                                     ),
                                     Row(
                                         Col(
-                                            Div(
-                                                Input(id="brief-name", name="name",
-                                                      placeholder="Your full name",
-                                                      cls="form-control contact-input", required=True),
-                                                Label("Full Name", fr="brief-name",
-                                                      cls="contact-floating-label"),
-                                                cls="contact-floating-field",
+                                            FloatingLabel(
+                                                "name",
+                                                label="Full Name",
+                                                placeholder="Your full name",
+                                                required=True,
+                                                input_id="brief-name",
+                                                input_cls="contact-input",
                                             ),
-                                            cols=12, md=6,
+                                            span=12, md=6,
                                         ),
                                         Col(
-                                            Div(
-                                                Input(id="brief-email", name="email", type="email",
-                                                      placeholder="your@email.com",
-                                                      cls="form-control contact-input", required=True),
-                                                Label("Email", fr="brief-email",
-                                                      cls="contact-floating-label"),
-                                                cls="contact-floating-field",
+                                            FloatingLabel(
+                                                "email",
+                                                label="Email",
+                                                input_type="email",
+                                                placeholder="your@email.com",
+                                                required=True,
+                                                input_id="brief-email",
+                                                input_cls="contact-input",
                                             ),
-                                            cols=12, md=6,
+                                            span=12, md=6,
                                         ),
                                         cls="g-3 mt-1",
                                     ),
                                     Div(
-                                        Input(id="brief-whatsapp", name="whatsapp",
-                                              placeholder="+234... (optional)",
-                                              cls="form-control contact-input mt-3"),
-                                        Label("WhatsApp Number", fr="brief-whatsapp",
-                                              cls="contact-floating-label"),
-                                        cls="contact-floating-field mt-3",
+                                        FloatingLabel(
+                                            "whatsapp",
+                                            label="WhatsApp Number",
+                                            placeholder="+234... (optional)",
+                                            input_id="brief-whatsapp",
+                                            input_cls="contact-input",
+                                            cls="mt-3",
+                                        ),
                                     ),
 
                                     # Step 2 — About the project
@@ -257,36 +252,30 @@ def booking_page() -> tuple[Any, ...]:
                                     ),
                                     Row(
                                         Col(
-                                            Div(
-                                                Select(*service_options, id="brief-service",
-                                                       name="service",
-                                                       cls="form-select contact-input"),
-                                                Label("Service Needed", fr="brief-service",
-                                                      cls="contact-floating-label"),
-                                                cls="contact-floating-field mt-3",
+                                            floating_select_field(
+                                                "service",
+                                                "Service Needed",
+                                                *service_options,
+                                                input_id="brief-service",
                                             ),
-                                            cols=12, md=6,
+                                            span=12, md=6,
                                         ),
                                         Col(
-                                            Div(
-                                                Select(*budget_options, id="brief-budget",
-                                                       name="budget",
-                                                       cls="form-select contact-input"),
-                                                Label("Budget Range", fr="brief-budget",
-                                                      cls="contact-floating-label"),
-                                                cls="contact-floating-field mt-3",
+                                            floating_select_field(
+                                                "budget",
+                                                "Budget Range",
+                                                *budget_options,
+                                                input_id="brief-budget",
                                             ),
-                                            cols=12, md=6,
+                                            span=12, md=6,
                                         ),
                                         cls="g-3",
                                     ),
-                                    Div(
-                                        Select(*timeline_options, id="brief-timeline",
-                                               name="timeline",
-                                               cls="form-select contact-input"),
-                                        Label("Preferred Timeline", fr="brief-timeline",
-                                              cls="contact-floating-label"),
-                                        cls="contact-floating-field mt-3",
+                                    floating_select_field(
+                                        "timeline",
+                                        "Preferred Timeline",
+                                        *timeline_options,
+                                        input_id="brief-timeline",
                                     ),
 
                                     # Step 3 — Project description
@@ -295,21 +284,17 @@ def booking_page() -> tuple[Any, ...]:
                                         H4("Tell Me More", cls="brief-step-title"),
                                         cls="brief-step-header mt-4",
                                     ),
-                                    Div(
-                                        Textarea(
-                                            id="brief-description", name="message",
-                                            placeholder=(
-                                                "Describe your project — what it does, who it's for, "
-                                                "and what the biggest challenge is. The more detail, "
-                                                "the better I can help."
-                                            ),
-                                            rows=6,
-                                            cls="form-control contact-input contact-textarea mt-3",
-                                            required=True,
+                                    floating_textarea_field(
+                                        "message",
+                                        "Project Description",
+                                        input_id="brief-description",
+                                        placeholder=(
+                                            "Describe your project — what it does, who it's for, "
+                                            "and what the biggest challenge is. The more detail, "
+                                            "the better I can help."
                                         ),
-                                        Label("Project Description", fr="brief-description",
-                                              cls="contact-floating-label"),
-                                        cls="contact-floating-field mt-3",
+                                        rows=6,
+                                        required=True,
                                     ),
 
                                     # Submit
@@ -331,7 +316,7 @@ def booking_page() -> tuple[Any, ...]:
                                 ),
                                 cls="book-form-card h-100 reveal-block",
                             ),
-                            cols=12, lg=7,
+                            span=12, lg=7,
                         ),
 
                         # Sidebar — what to expect
@@ -387,7 +372,7 @@ def booking_page() -> tuple[Any, ...]:
                                 ),
                                 cls="book-sidebar",
                             ),
-                            cols=12, lg=5,
+                            span=12, lg=5,
                             cls="mt-4 mt-lg-0",
                         ),
                         cls="g-4",

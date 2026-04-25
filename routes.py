@@ -10,13 +10,13 @@ from starlette.responses import FileResponse, HTMLResponse, JSONResponse
 
 try:
     from .components import page_shell, portfolio_controls, portfolio_grid, _page_nav_full
-    from .content import PROJECTS, SERVICES, DEVELOPER_NAME, CV_META
+    from .content import PORTFOLIO_FILTERS, PROJECTS, SERVICES, DEVELOPER_NAME, CV_META
     from .pages.blog import blog_index_page, blog_post_page
     from .pages.cv_page import cv_page
     from .pages.booking import booking_page
 except ImportError:
     from components import page_shell, portfolio_controls, portfolio_grid, _page_nav_full
-    from content import PROJECTS, SERVICES, DEVELOPER_NAME
+    from content import PORTFOLIO_FILTERS, PROJECTS, SERVICES, DEVELOPER_NAME
     from cv_content import CV_META
     from pages.blog import blog_index_page, blog_post_page
     from pages.cv_page import cv_page
@@ -27,8 +27,7 @@ DOWNLOAD_COUNTS = {"pdf": 0, "web": 0, "print": 0}
 SERVICE_MAP = {item.slug: item for item in SERVICES}
 PROJECT_MAP = {item.slug: item for item in PROJECTS}
 
-VALID_FILTERS = {"all", "full-stack", "frontend", "ai-ml", "devops", "mobile",
-                 "blockchain", "security", "desktop", "web"}
+VALID_FILTERS = {slug for slug, _ in PORTFOLIO_FILTERS}
 
 
 def _download_metrics_fragment() -> Div:
@@ -279,18 +278,24 @@ def setup_routes(app: Any, asset_dir: Path) -> None:
     @app.get("/project/{slug}")
     def project_detail(slug: str) -> Any:
         from pages.blog import _page_nav, _page_footer
+        from faststrap import Card, Col, Container, EmptyState, Icon, Row, SEO
+        from content import SITE_URL, DEVELOPER_NAME_SHORT
         project = PROJECT_MAP.get(slug)
         if not project:
             return (Title("Project Not Found"), _page_nav("/"), Main(
                 Container(
-                    H1("Project Not Found", cls="text-center mt-5"),
-                    A("← Back to Portfolio", href="/#portfolio", cls="btn hero-secondary-btn mt-3 d-block mx-auto"),
-                    cls="py-5",
+                    EmptyState(
+                        title="Project not found",
+                        description="This case study is missing or the link is no longer valid.",
+                        cls="py-5",
+                    ),
+                    Div(
+                        A("← Back to Portfolio", href="/#portfolio", cls="btn hero-secondary-btn mt-3 d-block mx-auto"),
+                        cls="text-center",
+                    ),
                 ),
                 cls="neo-app",
             ))
-        from faststrap import Card, Col, Row, Container, SEO
-        from content import SITE_URL, DEVELOPER_NAME_SHORT
         return (
             *SEO(
                 title=f"{project.title} | {DEVELOPER_NAME_SHORT}",
@@ -340,7 +345,7 @@ def setup_routes(app: Any, asset_dir: Path) -> None:
                                         cls="metric-meta-card",
                                     ),
                                 ),
-                                cols=12, lg=6,
+                                span=12, lg=6,
                             ),
                             Col(
                                 H2("Project Narrative", cls="cv-section-title"),
@@ -352,7 +357,7 @@ def setup_routes(app: Any, asset_dir: Path) -> None:
                                   target="_blank", rel="noreferrer",
                                   cls="btn hero-primary-btn"),
                                 A("Book a Consultation →", href="/book", cls="btn hero-secondary-btn ms-2"),
-                                cols=12, lg=6,
+                                span=12, lg=6,
                                 cls="mt-4 mt-lg-0",
                             ),
                             cls="g-4",
