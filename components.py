@@ -311,13 +311,12 @@ def portfolio_controls(active_filter: str) -> Div:
 
 # ── Navigation ────────────────────────────────────────────────────────────────
 
-def _mo_logo() -> Div:
-    """Stylised 'MO' monogram logo mark."""
-    return A(
+def _mo_logo() -> Span:
+    """Stylised 'MO' monogram logo mark for shared navbar branding."""
+    return Span(
         Span("M", cls="mo-logo-m"),
         Span("O", cls="mo-logo-o"),
         cls="mo-logo",
-        aria_label="MO — Home",
     )
 
 
@@ -378,8 +377,8 @@ def _shared_nav(
 
     return Navbar(
         nav_links,
-        Div(*actions, cls="d-flex align-items-center gap-2 flex-wrap ms-lg-3 mt-3 mt-lg-0"),
-        brand=_mo_logo() if home else Span(DEVELOPER_NAME_SHORT, cls="brand-mark"),
+        Div(*actions, cls="neo-nav-actions d-flex align-items-center gap-2 flex-wrap ms-lg-3 mt-3 mt-lg-0"),
+        brand=_mo_logo(),
         brand_href="#hero" if home else "/",
         variant="dark",
         expand="lg",

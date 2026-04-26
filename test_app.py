@@ -99,6 +99,16 @@ def test_inner_pages_include_shared_nav_and_key_content() -> None:
         assert marker in html
 
 
+def test_shared_nav_uses_compact_mo_logo_without_nested_brand_links() -> None:
+    for route in ("/", "/blog", "/cv", "/book"):
+        response = client.get(route)
+        html = response.text
+        assert response.status_code == 200
+        assert 'class="mo-logo"' in html
+        assert '<span class="brand-mark">' not in html
+        assert '<a href="#hero" class="navbar-brand"><a ' not in html
+
+
 def test_missing_content_pages_render_faststrap_empty_states() -> None:
     pages = {
         "/blog/does-not-exist": "Post not found",
