@@ -9,7 +9,7 @@ from fasthtml.common import (
     P, Section, Small, Span, Strong, Td, Th, Tr, Table,
     Tbody, Thead, Ul, Script
 )
-from faststrap import Badge, Button, Card, Col, Container, Icon, PageMeta, Progress, Row, SEO
+from faststrap import Button, Card, Col, Container, Icon, PageMeta, Progress, Row, SEO
 import json
 
 try:
@@ -76,7 +76,7 @@ def _tool_category(cat: Any) -> Div:
     return Div(
         H4(cat.label, cls="cv-tool-category"),
         Div(
-            *[Badge(tool, cls="cv-tool-badge") for tool in cat.tools],
+            *[Span(tool, cls="cv-tool-badge") for tool in cat.tools],
             cls="cv-tool-pills",
         ),
         cls="cv-tool-block reveal-block",
@@ -121,18 +121,18 @@ def cv_page() -> tuple[Any, ...]:
                         H1(DEVELOPER_NAME, cls="cv-header-name"),
                         P(DEVELOPER_ROLE, cls="cv-header-role"),
                         Div(
-                            Badge(Icon("geo-alt", cls="me-1"), LOCATION, cls="cv-contact-chip"),
-                            Badge(Icon("telephone", cls="me-1"), PHONE, cls="cv-contact-chip"),
-                            Badge(Icon("envelope", cls="me-1"), EMAIL, cls="cv-contact-chip"),
+                            Span(Icon("geo-alt", cls="me-1"), LOCATION, cls="cv-contact-chip"),
+                            Span(Icon("telephone", cls="me-1"), PHONE, cls="cv-contact-chip"),
+                            Span(Icon("envelope", cls="me-1"), EMAIL, cls="cv-contact-chip"),
                             A(
-                                Badge(Icon("github", cls="me-1"), "GitHub", cls="cv-contact-chip"),
+                                Span(Icon("github", cls="me-1"), "GitHub", cls="cv-contact-chip"),
                                 href=GITHUB_URL,
                                 target="_blank",
                                 rel="noreferrer",
                                 cls="cv-contact-link",
                             ),
                             A(
-                                Badge(Icon("linkedin", cls="me-1"), "LinkedIn", cls="cv-contact-chip"),
+                                Span(Icon("linkedin", cls="me-1"), "LinkedIn", cls="cv-contact-chip"),
                                 href=LINKEDIN_URL,
                                 target="_blank",
                                 rel="noreferrer",
@@ -264,7 +264,7 @@ def cv_page() -> tuple[Any, ...]:
                                 Card(
                                     H3("Competencies", cls="cv-sidebar-title"),
                                     Div(
-                                        *[Badge(c, cls="cv-competency-pill") for c in COMPETENCIES],
+                                        *[Span(c, cls="cv-competency-pill") for c in COMPETENCIES],
                                         cls="d-flex flex-wrap gap-2",
                                     ),
                                     cls="cv-sidebar-card mb-4",

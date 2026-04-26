@@ -109,6 +109,18 @@ def test_shared_nav_uses_compact_mo_logo_without_nested_brand_links() -> None:
         assert '<a href="#hero" class="navbar-brand"><a ' not in html
 
 
+def test_cv_uses_neutral_custom_pills_instead_of_primary_badges() -> None:
+    response = client.get("/cv")
+    html = response.text
+    assert response.status_code == 200
+    assert 'class="cv-contact-chip"' in html
+    assert 'class="cv-tool-badge"' in html
+    assert 'class="cv-competency-pill"' in html
+    assert 'text-bg-primary rounded-pill cv-contact-chip' not in html
+    assert 'text-bg-primary rounded-pill cv-tool-badge' not in html
+    assert 'text-bg-primary rounded-pill cv-competency-pill' not in html
+
+
 def test_missing_content_pages_render_faststrap_empty_states() -> None:
     pages = {
         "/blog/does-not-exist": "Post not found",
@@ -147,3 +159,13 @@ def test_inner_page_layouts_keep_responsive_column_classes() -> None:
         assert response.status_code == 200
         for cls in classes:
             assert cls in html
+
+
+def test_project_detail_uses_mobile_safe_detail_layout() -> None:
+    response = client.get("/project/backendforge")
+    html = response.text
+    assert response.status_code == 200
+    assert "project-detail-section" in html
+    assert "project-detail-metrics case-study-metrics" in html
+    assert "project-detail-copy" in html
+    assert "project-detail-actions" in html
