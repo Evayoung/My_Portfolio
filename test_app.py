@@ -27,6 +27,8 @@ def test_core_routes_render() -> None:
         "/blog",
         "/cv",
         "/book",
+        "/robots.txt",
+        "/sitemap.xml",
         "/portfolio-grid?filter=ai-ml",
         "/portfolio-controls?filter=security",
         "/service-detail?slug=ai-agent-design",
@@ -81,7 +83,30 @@ def test_unknown_filter_falls_back_to_all() -> None:
 def test_contact_requires_fields() -> None:
     response = client.post("/contact", data={"name": "", "email": "", "message": ""})
     assert response.status_code == 200
-    assert "Please fill in your name" in response.text
+    assert "A few details are missing" in response.text
+    assert "project brief" in response.text
+
+
+def test_contact_submission_offers_stateless_fallback_actions() -> None:
+    response = client.post(
+        "/contact",
+        data={
+            "name": "Jane Doe",
+            "email": "jane@example.com",
+            "subject": "Project Inquiry",
+            "message": "I need a backend system for a new product.",
+        },
+    )
+    html = response.text
+    assert response.status_code == 200
+    assert (
+        "Message received" in html
+        or "Ready to send" in html
+        or "Delivery needs a fallback" in html
+    )
+    if "Message received" not in html:
+        assert "Continue on WhatsApp" in html
+        assert "Send by Email" in html
 
 
 def test_inner_pages_include_shared_nav_and_key_content() -> None:
@@ -107,6 +132,16 @@ def test_shared_nav_uses_compact_mo_logo_without_nested_brand_links() -> None:
         assert 'class="mo-logo"' in html
         assert '<span class="brand-mark">' not in html
         assert '<a href="#hero" class="navbar-brand"><a ' not in html
+
+
+def test_home_social_icons_render_as_real_links() -> None:
+    response = client.get("/")
+    html = response.text
+    assert response.status_code == 200
+    assert 'class="social-icon-link"' in html
+    assert 'href="https://github.com/Evayoung"' in html
+    assert 'href="https://linkedin.com/in/michealolorundare"' in html
+    assert 'href="mailto:meshelleva@gmail.com"' in html
 
 
 def test_cv_uses_neutral_custom_pills_instead_of_primary_badges() -> None:
@@ -169,3 +204,62 @@ def test_project_detail_uses_mobile_safe_detail_layout() -> None:
     assert "project-detail-metrics case-study-metrics" in html
     assert "project-detail-copy" in html
     assert "project-detail-actions" in html
+
+
+def test_print_cv_uses_structured_cv_content() -> None:
+    response = client.get("/cv/print")
+    html = response.text
+    assert response.status_code == 200
+    assert "Prompt Engineering for Developers" in html
+    assert "Backend Lead" in html
+    assert "Redis" in html
+
+
+def test_booking_submission_offers_stateless_fallback_actions() -> None:
+    response = client.post(
+        "/book/submit",
+        data={
+            "name": "Jane Doe",
+            "email": "jane@example.com",
+            "whatsapp": "+2348000000000",
+            "service": "backend-api",
+            "budget": "250k-500k",
+            "timeline": "1-4-weeks",
+            "message": "I want to discuss a backend rebuild.",
+        },
+    )
+    html = response.text
+    assert response.status_code == 200
+    assert (
+        "Brief received" in html
+        or "Brief prepared" in html
+    )
+    if "Brief received" not in html:
+        assert "Send Brief on WhatsApp" in html
+        assert "Send Brief by Email" in html
+
+
+def test_seo_routes_publish_current_site_urls() -> None:
+    robots = client.get("/robots.txt")
+    sitemap = client.get("/sitemap.xml")
+
+    assert robots.status_code == 200
+    assert "https://olorundaremicheal.vercel.app/sitemap.xml" in robots.text
+
+    assert sitemap.status_code == 200
+    assert "<urlset" in sitemap.text
+    assert "https://olorundaremicheal.vercel.app/blog" in sitemap.text
+    assert "https://olorundaremicheal.vercel.app/project/backendforge" in sitemap.text
+
+
+def test_pdf_download_route_serves_real_pdf_asset() -> None:
+    response = client.get("/resume/download/pdf")
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("application/pdf")
+    assert response.content.startswith(b"%PDF")
+    assert len(response.content) > 5000
+
+
+def test_public_env_template_exists() -> None:
+    root = Path(__file__).parent
+    assert (root / ".env.example").exists()

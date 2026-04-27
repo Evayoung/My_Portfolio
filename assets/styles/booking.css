@@ -1,0 +1,111 @@
+/* ═══ BOOKING ════════════════════════════════════════════════════════════════ */
+.book-header-section { position:relative; padding:7rem 0 3.5rem; background:linear-gradient(180deg,rgba(7,17,31,0.65) 0%,rgba(7,17,31,0.95) 100%),url("/assets/images/hero-bg2.jpg") center/cover no-repeat; }
+.book-header-section .container { position:relative; z-index:1; }
+.book-header-title { font-size:clamp(2.2rem,5vw,3.6rem); font-weight:700; margin:0.4rem 0 0.5rem; }
+.book-header-sub { color:var(--text-soft); font-size:1.05rem; max-width:46ch; margin:0 auto; }
+.book-connect-section,.book-form-section { background:var(--bg-main); }
+.book-connect-card { background:var(--bg-elevated); border:1px solid rgba(74,208,255,0.1); border-radius:1rem; padding:1.5rem; transition:border-color 0.2s,transform 0.2s; }
+.book-connect-card:hover { border-color:rgba(74,208,255,0.3); transform:translateY(-2px); }
+.book-connect-row { display:flex; align-items:flex-start; gap:1rem; }
+.book-icon-box { width:3rem; height:3rem; flex-shrink:0; display:flex; align-items:center; justify-content:center; border-radius:999px; font-size:1.35rem; }
+.book-icon-wa { background:rgba(37,211,102,0.12); color:#25d366; }
+.book-icon-email { background:rgba(74,208,255,0.1); color:var(--cyan); }
+.book-icon-glyph { font-size:1.1rem; }
+.book-connect-title { font-size:1.05rem; font-weight:700; margin:0 0 0.3rem; }
+.book-connect-copy { color:var(--text-soft); font-size:0.88rem; line-height:1.5; margin:0; }
+.book-form-card { background:var(--bg-elevated); border:1px solid rgba(74,208,255,0.1); border-radius:1rem; padding:1.75rem; }
+.brief-step-header { display:flex; align-items:center; gap:0.85rem; margin:1.6rem 0 0.5rem; }
+.brief-step-num { width:2rem; height:2rem; border-radius:999px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:rgba(74,208,255,0.12); color:var(--cyan); font-weight:700; font-size:0.82rem; border:1px solid rgba(74,208,255,0.3); }
+.brief-step-title { font-size:0.98rem; font-weight:700; margin:0; }
+.expect-list { display:grid; gap:1rem; }
+.expect-row { display:flex; align-items:flex-start; gap:0.85rem; padding:0.85rem; background:rgba(255,255,255,0.025); border-radius:0.7rem; }
+.expect-num { width:1.8rem; height:1.8rem; border-radius:999px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:rgba(74,208,255,0.1); color:var(--cyan); font-size:0.78rem; font-weight:700; }
+.book-service-row { padding:0.65rem 0; border-bottom:1px solid rgba(255,255,255,0.05); }
+.book-service-row:last-child { border-bottom:0; }
+.form-select.contact-input { appearance:none; -webkit-appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2346c8ee' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 0.9rem center; padding-right:2.2rem; cursor:pointer; }
+
+@media (max-width: 768px) {
+  .content-section {
+    padding: 4rem 0;
+  }
+
+  .content-section > .container,
+  .cv-header-section > .container,
+  .book-header-section > .container,
+  .post-hero-strip > .container,
+  .site-footer > .container {
+    padding-left: 1.1rem;
+    padding-right: 1.1rem;
+  }
+
+  .section-header {
+    margin-bottom: 2.15rem;
+  }
+
+  .post-headline { font-size:1.6rem; max-width:100%; }
+  .cv-header-name { font-size:2rem; }
+  .book-header-title { font-size:1.9rem; }
+  .project-detail-copy { padding:1.15rem 1rem; }
+  .project-detail-section { padding-top:3rem; }
+  .cv-tools-grid { grid-template-columns:1fr; }
+  .cv-contact-grid { flex-direction:column; align-items:stretch; gap:0.65rem; }
+  .cv-contact-chip { justify-content:center; width:100%; }
+  .cv-section { padding-bottom:2.35rem; }
+  .cv-work-body,
+  .cv-sidebar-card,
+  .cv-tool-block,
+  .cv-cert-row,
+  .book-connect-card,
+  .book-form-card,
+  .post-author-card,
+  .post-sidebar-card,
+  .blog-card {
+    padding: 1rem;
+  }
+
+  .post-body-container {
+    padding: 2.35rem 1.1rem 0;
+  }
+}
+@media (max-width: 576px) {
+  .post-hero-strip { padding:6rem 0 2.5rem; background-attachment:scroll; }
+  .content-section {
+    padding: 3.5rem 0;
+  }
+
+  .content-section > .container,
+  .cv-header-section > .container,
+  .book-header-section > .container,
+  .post-hero-strip > .container,
+  .site-footer > .container {
+    padding-left: 0.95rem;
+    padding-right: 0.95rem;
+  }
+
+  .cv-header-section,.book-header-section { padding:5.25rem 0 2.35rem; }
+  .project-detail-actions { grid-template-columns:1fr; }
+  .blog-section .blog-index-header,
+  .book-header-content,
+  .cv-header-content {
+    padding-left: 0.1rem;
+    padding-right: 0.1rem;
+  }
+
+  .section-header {
+    margin-bottom: 1.9rem;
+  }
+
+  .section-title {
+    font-size: 2.15rem;
+  }
+
+  .cv-summary-text,
+  .post-body blockquote {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .post-body-container {
+    padding: 2rem 0.95rem 0;
+  }
+}

@@ -17,23 +17,35 @@ try:
         DEVELOPER_NAME, DEVELOPER_NAME_SHORT, DEVELOPER_ROLE, EMAIL,
         GITHUB_URL, LINKEDIN_URL, PHONE, SITE_URL, WHATSAPP, LOCATION,
     )
-    from ..cv_content import (
-        CERTIFICATIONS, COMPETENCIES, CORE_SKILLS, CV_META,
-        EDUCATION, LANGUAGES, TOOLS_GRID, WORK_HISTORY,
+    from ..services.content_service import (
+        get_cv_meta,
+        list_certifications,
+        list_competencies,
+        list_core_skills,
+        list_education,
+        list_languages,
+        list_tool_categories,
+        list_work_history,
     )
 except ImportError:
     from content import (
         DEVELOPER_NAME, DEVELOPER_NAME_SHORT, DEVELOPER_ROLE, EMAIL,
         GITHUB_URL, LINKEDIN_URL, PHONE, SITE_URL, WHATSAPP, LOCATION,
     )
-    from cv_content import (
-        CERTIFICATIONS, COMPETENCIES, CORE_SKILLS, CV_META,
-        EDUCATION, LANGUAGES, TOOLS_GRID, WORK_HISTORY,
+    from services.content_service import (
+        get_cv_meta,
+        list_certifications,
+        list_competencies,
+        list_core_skills,
+        list_education,
+        list_languages,
+        list_tool_categories,
+        list_work_history,
     )
 try:
-    from ..components import shared_inner_nav
+    from ..ui.shared import inner_page_footer, shared_inner_nav
 except ImportError:
-    from components import shared_inner_nav
+    from ui.shared import inner_page_footer, shared_inner_nav
 
 
 def _cv_nav() -> Nav:
@@ -56,7 +68,7 @@ def _work_item(item: Any) -> Div:
                 Div(
                     Icon("building", cls="me-1 small"),
                     Strong(item.organisation),
-                    Span(" · ", cls="text-muted"),
+                    Span(" | ", cls="text-muted"),
                     Span(item.location, cls="text-muted small"),
                     cls="cv-org-line mt-1",
                 ),
@@ -84,6 +96,15 @@ def _tool_category(cat: Any) -> Div:
 
 
 def cv_page() -> tuple[Any, ...]:
+    cv_meta = get_cv_meta()
+    work_history = list_work_history()
+    education = list_education()
+    certifications = list_certifications()
+    tool_categories = list_tool_categories()
+    languages = list_languages()
+    core_skills = list_core_skills()
+    competencies = list_competencies()
+
     structured_data = {
         "@context": "https://schema.org",
         "@type": "Person",
@@ -105,7 +126,7 @@ def cv_page() -> tuple[Any, ...]:
     return (
         *PageMeta(
             title=f"Curriculum Vitae | {DEVELOPER_NAME_SHORT}",
-            description=CV_META["summary"][:160],
+            description=cv_meta["summary"][:160],
             keywords=["CV", "resume", "portfolio", "FastAPI", "Python", "AI", "Nigeria", "Ilorin", "developer"],
             url=f"{SITE_URL}/cv",
             twitter_creator="@evayoung",
@@ -169,7 +190,7 @@ def cv_page() -> tuple[Any, ...]:
                             # Professional Summary
                             Div(
                                 H2("Professional Summary", cls="cv-section-title"),
-                                P(CV_META["summary"], cls="cv-summary-text reveal-block"),
+                                P(cv_meta["summary"], cls="cv-summary-text reveal-block"),
                                 cls="cv-section mb-5",
                             ),
 
@@ -177,7 +198,7 @@ def cv_page() -> tuple[Any, ...]:
                             Div(
                                 H2("Experience", cls="cv-section-title"),
                                 Div(
-                                    *[_work_item(item) for item in WORK_HISTORY],
+                                    *[_work_item(item) for item in work_history],
                                     cls="cv-timeline",
                                 ),
                                 cls="cv-section mb-5",
@@ -200,7 +221,7 @@ def cv_page() -> tuple[Any, ...]:
                                                     ),
                                                     cls="cv-timeline-entry",
                                                 )
-                                                for edu in EDUCATION
+                                                for edu in education
                                             ],
                                             cls="cv-timeline",
                                         ),
@@ -217,12 +238,12 @@ def cv_page() -> tuple[Any, ...]:
                                                     ),
                                                     Div(
                                                         Strong(cert.name),
-                                                        P(f"{cert.issuer} · {cert.year}", cls="small text-muted mb-0"),
+                                                        P(f"{cert.issuer} | {cert.year}", cls="small text-muted mb-0"),
                                                         cls="",
                                                     ),
                                                     cls="cv-cert-row reveal-block",
                                                 )
-                                                for cert in CERTIFICATIONS
+                                                for cert in certifications
                                             ],
                                             cls="cv-cert-list",
                                         ),
@@ -234,7 +255,7 @@ def cv_page() -> tuple[Any, ...]:
                                     Div(
                                         H2("Tools & Technologies", cls="cv-section-title"),
                                         Div(
-                                            *[_tool_category(cat) for cat in TOOLS_GRID],
+                                            *[_tool_category(cat) for cat in tool_categories],
                                             cls="cv-tools-grid",
                                         ),
                                         cls="cv-section",
@@ -254,7 +275,7 @@ def cv_page() -> tuple[Any, ...]:
                                 Card(
                                     H3("Core Skills", cls="cv-sidebar-title"),
                                     Ul(
-                                        *[Li(skill, cls="cv-skill-item") for skill in CORE_SKILLS],
+                                        *[Li(skill, cls="cv-skill-item") for skill in core_skills],
                                         cls="cv-skill-list",
                                     ),
                                     cls="cv-sidebar-card mb-4",
@@ -264,7 +285,7 @@ def cv_page() -> tuple[Any, ...]:
                                 Card(
                                     H3("Competencies", cls="cv-sidebar-title"),
                                     Div(
-                                        *[Span(c, cls="cv-competency-pill") for c in COMPETENCIES],
+                                        *[Span(c, cls="cv-competency-pill") for c in competencies],
                                         cls="d-flex flex-wrap gap-2",
                                     ),
                                     cls="cv-sidebar-card mb-4",
@@ -283,7 +304,7 @@ def cv_page() -> tuple[Any, ...]:
                                             Progress(pct, cls="skill-progress-track"),
                                             cls="mb-3",
                                         )
-                                        for lang, level, pct in LANGUAGES
+                                        for lang, level, pct in languages
                                     ],
                                     cls="cv-sidebar-card mb-4",
                                 ),
@@ -306,7 +327,7 @@ def cv_page() -> tuple[Any, ...]:
                                         href=f"mailto:{EMAIL}",
                                         cls="btn hero-secondary-btn btn-sm w-100 mb-2",
                                     ),
-                                    A("Book a Consultation →", href="/book",
+                                    A("Book a Consultation ->", href="/book",
                                       cls="small neo-link d-block text-center"),
                                     cls="cv-sidebar-card",
                                 ),
@@ -324,20 +345,8 @@ def cv_page() -> tuple[Any, ...]:
             ),
 
             # ── Footer ──────────────────────────────────────────────────────────
-            Footer(
-                Container(
-                    P(
-                        f"© 2025 {DEVELOPER_NAME_SHORT} · ",
-                        A("Home", href="/", cls="footer-link"),
-                        " · ",
-                        A("Blog", href="/blog", cls="footer-link"),
-                        " · ",
-                        A("Book", href="/book", cls="footer-link"),
-                        cls="footer-copy text-center",
-                    ),
-                ),
-                cls="site-footer",
-            ),
+            inner_page_footer(inline=True),
             cls="neo-app",
         ),
     )
+

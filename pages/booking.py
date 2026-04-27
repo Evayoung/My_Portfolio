@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from fasthtml.common import (
-    A, Button, Div, Footer, Form, H1, H2, H3, H4,
+    A, Button, Div, Footer, Form, H1, H2, H3, H4, Input,
     Main, Nav, Option, P, Section, Span, Strong,
 )
 from faststrap import Card, Col, Container, FloatingLabel, Icon, Row, SEO
@@ -13,24 +13,19 @@ from faststrap import Card, Col, Container, FloatingLabel, Icon, Row, SEO
 try:
     from ..content import (
         DEVELOPER_NAME_SHORT, DEVELOPER_ROLE, EMAIL,
-        FORMSPREE_BOOKING_ID, LOCATION, SITE_URL, WHATSAPP,
-        SERVICES,
+        LOCATION, SITE_URL, WHATSAPP,
     )
+    from ..services.content_service import list_services
 except ImportError:
     from content import (
         DEVELOPER_NAME_SHORT, DEVELOPER_ROLE, EMAIL,
-        FORMSPREE_BOOKING_ID, LOCATION, SITE_URL, WHATSAPP,
-        SERVICES,
+        LOCATION, SITE_URL, WHATSAPP,
     )
+    from services.content_service import list_services
 try:
-    from ..components import shared_inner_nav
+    from ..ui.shared import floating_select_field, floating_textarea_field, inner_page_footer, shared_inner_nav
 except ImportError:
-    from components import shared_inner_nav
-
-try:
-    from ..components import floating_select_field, floating_textarea_field
-except ImportError:
-    from components import floating_select_field, floating_textarea_field
+    from ui.shared import floating_select_field, floating_textarea_field, inner_page_footer, shared_inner_nav
 
 
 def _book_nav() -> Nav:
@@ -38,24 +33,25 @@ def _book_nav() -> Nav:
 
 
 def booking_page() -> tuple[Any, ...]:
+    services = list_services()
     service_options = [Option("Select a service...", value="", disabled=True, selected=True)]
-    service_options += [Option(s.title, value=s.slug) for s in SERVICES]
+    service_options += [Option(s.title, value=s.slug) for s in services]
 
     budget_options = [
         Option("Select budget range...", value="", disabled=True, selected=True),
-        Option("Under ₦100k",            value="under-100k"),
-        Option("₦100k – ₦250k",          value="100k-250k"),
-        Option("₦250k – ₦500k",          value="250k-500k"),
-        Option("₦500k – ₦1M",            value="500k-1m"),
-        Option("Above ₦1M",              value="above-1m"),
+        Option("Under N100k",            value="under-100k"),
+        Option("N100k - N250k",          value="100k-250k"),
+        Option("N250k - N500k",          value="250k-500k"),
+        Option("N500k - N1M",            value="500k-1m"),
+        Option("Above N1M",              value="above-1m"),
         Option("Prefer to discuss",      value="discuss"),
     ]
 
     timeline_options = [
         Option("Select timeline...", value="", disabled=True, selected=True),
         Option("ASAP (under 2 weeks)",   value="asap"),
-        Option("1 – 4 weeks",            value="1-4-weeks"),
-        Option("1 – 2 months",           value="1-2-months"),
+        Option("1 - 4 weeks",            value="1-4-weeks"),
+        Option("1 - 2 months",           value="1-2-months"),
         Option("3+ months",              value="3-plus-months"),
         Option("Ongoing / retainer",     value="ongoing"),
         Option("Flexible",               value="flexible"),
@@ -71,7 +67,7 @@ def booking_page() -> tuple[Any, ...]:
             title=f"Book a Consultation | {DEVELOPER_NAME_SHORT}",
             description=(
                 "Book a technical consultation or send a project brief to Olorundare Micheal Babawale "
-                "— Full-Stack & AI Systems Architect based in Ilorin, Nigeria."
+                "- Full-Stack & AI Systems Architect based in Ilorin, Nigeria."
             ),
             keywords=["hire developer", "book developer", "FastAPI consultant", "AI engineer Nigeria",
                       "project brief", "Micheal Olorundare"],
@@ -201,6 +197,14 @@ def booking_page() -> tuple[Any, ...]:
                                   cls="panel-copy mb-4"),
 
                                 Form(
+                                    Input(
+                                        type="text",
+                                        name="company",
+                                        tabindex="-1",
+                                        autocomplete="off",
+                                        aria_hidden="true",
+                                        cls="d-none",
+                                    ),
                                     # Step 1 — Who are you?
                                     Div(
                                         Div("01", cls="brief-step-num"),
@@ -289,7 +293,7 @@ def booking_page() -> tuple[Any, ...]:
                                         "Project Description",
                                         input_id="brief-description",
                                         placeholder=(
-                                            "Describe your project — what it does, who it's for, "
+                                            "Describe your project - what it does, who it's for, "
                                             "and what the biggest challenge is. The more detail, "
                                             "the better I can help."
                                         ),
@@ -305,11 +309,9 @@ def booking_page() -> tuple[Any, ...]:
                                         cls="btn contact-submit-btn mt-4 cta-pulse",
                                     ),
                                     Div(id="brief-result", cls="mt-3"),
-
-                                    # Formspree action — update FORMSPREE_BOOKING_ID in content.py
-                                    action=f"https://formspree.io/f/{FORMSPREE_BOOKING_ID}",
+                                    action="/book/submit",
                                     method="post",
-                                    hx_post=f"https://formspree.io/f/{FORMSPREE_BOOKING_ID}",
+                                    hx_post="/book/submit",
                                     hx_target="#brief-result",
                                     hx_swap="innerHTML",
                                     cls="brief-form",
@@ -339,7 +341,7 @@ def booking_page() -> tuple[Any, ...]:
                                                 ("1", "I'll review your brief",
                                                  "Usually within 24 hours of receiving it."),
                                                 ("2", "Discovery call",
-                                                 "15–30 minute conversation via WhatsApp or call to clarify requirements."),
+                                                 "15-30 minute conversation via WhatsApp or call to clarify requirements."),
                                                 ("3", "Proposal & timeline",
                                                  "A written scope of work with milestones and delivery dates."),
                                                 ("4", "We build",
@@ -361,7 +363,7 @@ def booking_page() -> tuple[Any, ...]:
                                             ),
                                             cls="book-service-row",
                                         )
-                                        for s in SERVICES
+                                        for s in services
                                     ],
                                     P(
                                         "All rates are starting prices for clearly scoped work. "
@@ -380,21 +382,8 @@ def booking_page() -> tuple[Any, ...]:
                 ),
                 cls="content-section book-form-section",
             ),
-
-            Footer(
-                Container(
-                    P(
-                        f"© 2025 {DEVELOPER_NAME_SHORT} · ",
-                        A("Home", href="/", cls="footer-link"),
-                        " · ",
-                        A("Blog", href="/blog", cls="footer-link"),
-                        " · ",
-                        A("CV", href="/cv", cls="footer-link"),
-                        cls="footer-copy text-center",
-                    ),
-                ),
-                cls="site-footer",
-            ),
+            inner_page_footer(inline=True, include_book=False),
             cls="neo-app",
         ),
     )
+

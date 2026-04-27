@@ -1,4 +1,4 @@
-"""Structured CV data — Olorundare Micheal Babawale."""
+"""Structured CV data for NeoPortfolio."""
 
 from __future__ import annotations
 
@@ -36,81 +36,72 @@ class ToolCategory:
     tools: tuple[str, ...]
 
 
-# ── Education ─────────────────────────────────────────────────────────────────
-
 EDUCATION = (
     EducationItem(
         "BSc. Statistics",
         "University of Ilorin",
-        "2015 – 2019",
-        "Foundation in quantitative analysis, probability, and data modelling — directly applicable to AI system design.",
+        "2015 - 2019",
+        "Built a strong foundation in quantitative analysis, probability, and data modelling that now informs systems thinking, AI evaluation, and backend architecture decisions.",
     ),
 )
 
-# ── Work History ──────────────────────────────────────────────────────────────
 
 WORK_HISTORY = (
     WorkItem(
         "Full-Stack & AI Systems Architect",
         "Independent / Freelance",
-        "2023 – Present",
+        "2023 - Present",
         "Ilorin, Nigeria (Remote)",
         (
-            "Designed and shipped 10+ production systems spanning web, mobile, desktop, and embedded platforms",
-            "Built BackendForge — a multi-agent AI system where 18 collaborating agents autonomously scaffold FastAPI backends",
-            "Developed Voice-First Learning Assistant: a 4-component cross-platform system with hybrid offline STT",
-            "Architected biometric access control for UNILORIN CBT centres, reducing impersonation cases",
-            "Delivered QRive SaaS — a FastAPI + Reflex platform for AI-powered business identity verification via QR codes",
-            "Built TrueTag product authentication backend with blockchain token minting and geolocation fraud detection",
+            "Designed and delivered 10+ production systems spanning web, mobile, desktop, and embedded environments.",
+            "Built BackendForge, a multi-agent AI orchestration system where 18 specialised agents collaboratively scaffold FastAPI backends from natural-language specifications.",
+            "Developed the Voice-First Learning Assistant, a four-part accessibility platform with hybrid offline speech recognition for low-connectivity classroom use.",
+            "Architected biometric access control for UNILORIN CBT centres, helping reduce impersonation risk and streamline candidate verification.",
+            "Delivered QRive, a FastAPI + Reflex SaaS platform for AI-assisted business identity verification through secure QR workflows.",
+            "Built the TrueTag authentication backend with blockchain token minting and geolocation-aware fraud detection for product verification.",
+        ),
+    ),
+    WorkItem(
+        "Backend Lead - Clinic Management System",
+        "University of Ilorin",
+        "2025",
+        "Ilorin, Nigeria",
+        (
+            "Led backend delivery for a secure digital clinic platform that replaced paper-based medical records with a FastAPI + PostgreSQL workflow.",
+            "Implemented QR-card access and role-based dashboards for students, doctors, pharmacists, and administrators.",
+            "Supported a production deployment used by the university clinic to improve record access and operational visibility.",
+        ),
+    ),
+    WorkItem(
+        "Platform Architect - Church Data Infrastructure",
+        "Deeper Christian Life Ministry, Kwara State",
+        "2024 - Present",
+        "Ilorin, Nigeria",
+        (
+            "Designed and maintain a scalable data platform powering two mobile applications and a shared REST API across state branches.",
+            "Implemented custom RBAC with state, zone, and branch-level permission scopes to support distributed governance safely.",
+            "Built attendance analytics, newcomer registration flows, and real-time reporting dashboards for operational oversight.",
         ),
     ),
     WorkItem(
         "Python & Software Development Tutor",
         "SuperProf & Certmart",
-        "2023 – Present",
+        "2023 - Present",
         "Remote",
         (
-            "Teaching Python, FastAPI, software architecture, and AI literacy to students across experience levels",
-            "Designed tailored learning plans emphasising practical coding, system design, and real-world deployment",
-            "Mentored students in building production-grade applications from first principles",
-        ),
-    ),
-    WorkItem(
-        "Backend Lead — Clinic Management System",
-        "University of Ilorin",
-        "2025",
-        "Ilorin, Nigeria",
-        (
-            "Replaced paper-based clinic records with a secure digital health platform using FastAPI and PostgreSQL",
-            "Implemented QR-card access system and role-based dashboards for students, doctors, pharmacists, and admin",
-            "Project deployed and actively used by the university clinic system",
-        ),
-    ),
-    WorkItem(
-        "Platform Architect — Church Data Infrastructure",
-        "Deeper Christian Life Ministry, Kwara State",
-        "2024 – Present",
-        "Ilorin, Nigeria",
-        (
-            "Designed and maintain a scalable data platform powering two mobile apps and a REST API across state branches",
-            "Implemented custom RBAC with state, zone, and branch-level permission scopes",
-            "Built attendance analytics, newcomer registration, and real-time reporting dashboards",
+            "Teach Python, FastAPI, software architecture, and AI literacy to learners across beginner to intermediate levels.",
+            "Design tailored learning plans that emphasise practical coding, system design, and real-world deployment habits.",
+            "Mentor students as they move from first principles into building complete, production-oriented applications.",
         ),
     ),
 )
 
-# ── Certifications ────────────────────────────────────────────────────────────
 
 CERTIFICATIONS = (
     Certification(
-        "Python for Everybody Specialisation",
-        "Coursera / University of Michigan",
-        "2021",
-    ),
-    Certification(
-        "FastAPI — Full Course for Beginners",
-        "freeCodeCamp",
-        "2022",
+        "Prompt Engineering for Developers",
+        "DeepLearning.AI",
+        "2024",
     ),
     Certification(
         "AI for Everyone",
@@ -118,44 +109,47 @@ CERTIFICATIONS = (
         "2023",
     ),
     Certification(
-        "Prompt Engineering for Developers",
-        "DeepLearning.AI",
-        "2024",
+        "FastAPI - Full Course for Beginners",
+        "freeCodeCamp",
+        "2022",
+    ),
+    Certification(
+        "Python for Everybody Specialisation",
+        "Coursera / University of Michigan",
+        "2021",
     ),
 )
 
-# ── Tool Categories (skills grid) ─────────────────────────────────────────────
 
 TOOLS_GRID = (
-    ToolCategory("Languages",       ("Python", "SQL", "JavaScript", "Bash", "Solidity")),
-    ToolCategory("Frameworks",      ("FastAPI", "FastHTML", "Faststrap", "Reflex", "KivyMD")),
-    ToolCategory("Desktop / GUI",   ("PySide6", "PyQt6", "KivyMD", "Tkinter")),
-    ToolCategory("AI / ML",         ("OpenAI API", "Faster-Whisper", "Piper-TTS", "LangChain", "RAG")),
-    ToolCategory("Data / Infra",    ("PostgreSQL", "SQLite", "Redis", "Docker", "systemd")),
-    ToolCategory("Other",           ("HTMX", "Paystack", "Blockchain / Web3", "Git / GitHub", "Linux")),
+    ToolCategory("Languages", ("Python", "SQL", "JavaScript", "Bash", "Solidity")),
+    ToolCategory("Frameworks", ("FastAPI", "FastHTML", "Faststrap", "Reflex", "KivyMD")),
+    ToolCategory("Desktop / GUI", ("PySide6", "PyQt6", "KivyMD", "Tkinter")),
+    ToolCategory("AI / ML", ("OpenAI API", "Faster-Whisper", "Piper-TTS", "LangChain", "RAG")),
+    ToolCategory("Data / Infra", ("PostgreSQL", "SQLite", "Redis", "Docker", "systemd")),
+    ToolCategory("Other", ("HTMX", "Paystack", "Blockchain / Web3", "Git / GitHub", "Linux")),
 )
 
-# ── Language proficiency ──────────────────────────────────────────────────────
 
 LANGUAGES = (
     ("English", "Fluent", 95),
-    ("Yoruba",  "Native", 100),
+    ("Yoruba", "Native", 100),
 )
 
-# ── Professional skills list (for CV sidebar) ─────────────────────────────────
 
 CORE_SKILLS = (
-    "AI Integration & LLM-Driven Systems",
-    "Model Fine-Tuning & Prompt Engineering",
-    "Full-Stack Development (Web, Mobile, Desktop)",
-    "Software Architecture & System Design",
-    "RESTful API Engineering (FastAPI)",
-    "Distributed & Offline-First Applications",
-    "Database Modelling & Optimisation (SQL/NoSQL)",
-    "Authentication & Role-Based Access Control",
-    "Multi-Agent AI Orchestration",
-    "Biometric & Embedded System Integration",
+    "AI integration and LLM-powered product workflows",
+    "Prompt engineering and model adaptation",
+    "Full-stack product development across web, mobile, and desktop",
+    "Software architecture and modular system design",
+    "REST API engineering with FastAPI",
+    "Offline-first and distributed application design",
+    "Database modelling and query optimisation",
+    "Authentication, RBAC, and secure backend design",
+    "Multi-agent orchestration and automation systems",
+    "Biometric, device, and embedded-system integration",
 )
+
 
 COMPETENCIES = (
     "Analytical Problem-Solving",
@@ -166,24 +160,22 @@ COMPETENCIES = (
     "Continuous Learning",
 )
 
-# ── CV Meta (for <head> of the print CV page) ─────────────────────────────────
 
 CV_META = {
-    "name":       "Olorundare Micheal Babawale",
-    "role":       "Full-Stack & AI Systems Architect",
-    "email":      "meshelleva@gmail.com",
-    "phone":      "+2348064676590",
-    "whatsapp":   "+2349029952120",
-    "location":   "Ilorin, Kwara State, Nigeria",
-    "github":     "https://github.com/Evayoung",
-    "linkedin":   "https://linkedin.com/in/michealolorundare",
+    "name": "Olorundare Micheal Babawale",
+    "role": "Full-Stack & AI Systems Architect",
+    "email": "meshelleva@gmail.com",
+    "phone": "+2348064676590",
+    "whatsapp": "+2349029952120",
+    "location": "Ilorin, Kwara State, Nigeria",
+    "github": "https://github.com/Evayoung",
+    "linkedin": "https://linkedin.com/in/michealolorundare",
     "summary": (
-        "Versatile Full-Stack & AI Systems Architect with proven expertise in designing, deploying, "
-        "and optimising scalable intelligent systems across web, mobile, and distributed environments. "
-        "Adept at architecting secure, modular backends with FastAPI, emphasising clean API design, "
-        "reliable data flow, and extensible microservices. Deeply skilled in AI integration, model "
-        "fine-tuning, and prompt engineering, with hands-on experience adapting LLMs to domain-specific "
-        "use cases. Experienced in autonomous agent design including MCP experimentation. Passionate about "
-        "building ethical, human-centred, and open-source technology."
+        "Full-Stack and AI Systems Architect focused on designing practical, production-ready software across "
+        "web, mobile, desktop, and distributed environments. Strong in FastAPI backend engineering, modular "
+        "system design, data modelling, and AI integration, with hands-on experience building multi-agent "
+        "automation, offline-first accessibility tools, biometric platforms, and operational data systems. "
+        "Known for translating complex product ideas into reliable technical architecture with a clear focus "
+        "on usability, maintainability, and real-world deployment."
     ),
 }

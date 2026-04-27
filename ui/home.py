@@ -1,22 +1,19 @@
-"""Reusable UI composition for NeoPortfolio."""
+"""Home-page sections and shell composition."""
 
 from __future__ import annotations
 
 from typing import Any
+import json
 
 from fasthtml.common import *
 from faststrap import (
     Button,
     Card,
     Col,
-    Container,
-    EmptyState,
     Feature,
     FeatureGrid,
     FloatingLabel,
     Icon,
-    Modal,
-    Navbar,
     PageMeta,
     PricingGroup,
     Progress,
@@ -24,102 +21,64 @@ from faststrap import (
     SEO,
     Testimonial,
     TestimonialSection,
-    ToggleGroup,
 )
-import json
 
 try:
-    from .content import (
-        ABOUT_STATS, ABOUT_SUMMARY, CODE_SAMPLE, CV_HIGHLIGHTS, DEVELOPER_NAME,
-        DEVELOPER_NAME_SHORT, DEVELOPER_ROLE, EMAIL, EXPERIENCE, GITHUB_URL,
-        HERO_SUMMARY, JOURNEY_PARAGRAPHS, KEYWORDS_GLOBAL, LINKEDIN_URL, LOCATION,
-        PHONE, PORTFOLIO_FILTERS, PRICING_TIERS, PROJECTS, ROLE_TITLES, SERVICES,
-        SITE_URL, SOCIAL_LINKS, TECHNICAL_SKILLS, TESTIMONIALS, WHATSAPP,
+    from ..content import (
+        ABOUT_STATS,
+        ABOUT_SUMMARY,
+        CODE_SAMPLE,
+        CV_HIGHLIGHTS,
+        DEVELOPER_NAME,
+        DEVELOPER_NAME_SHORT,
+        DEVELOPER_ROLE,
+        EMAIL,
+        EXPERIENCE,
+        GITHUB_URL,
+        HERO_SUMMARY,
+        JOURNEY_PARAGRAPHS,
+        KEYWORDS_GLOBAL,
+        LINKEDIN_URL,
+        LOCATION,
+        PHONE,
+        ROLE_TITLES,
+        SITE_URL,
+        SOCIAL_LINKS,
+        TECHNICAL_SKILLS,
+        WHATSAPP,
     )
+    from ..services.content_service import list_pricing_tiers, list_services, list_testimonials
+    from .modals import case_study_modal, cv_preview_modal, project_preview_modal, service_modal
+    from .portfolio import portfolio_controls
+    from .shared import floating_textarea_field, footer, section_header, site_nav, social_icon
 except ImportError:
     from content import (
-        ABOUT_STATS, ABOUT_SUMMARY, CODE_SAMPLE, CV_HIGHLIGHTS, DEVELOPER_NAME,
-        DEVELOPER_NAME_SHORT, DEVELOPER_ROLE, EMAIL, EXPERIENCE, GITHUB_URL,
-        HERO_SUMMARY, JOURNEY_PARAGRAPHS, KEYWORDS_GLOBAL, LINKEDIN_URL, LOCATION,
-        PHONE, PORTFOLIO_FILTERS, PRICING_TIERS, PROJECTS, ROLE_TITLES, SERVICES,
-        SITE_URL, SOCIAL_LINKS, TECHNICAL_SKILLS, TESTIMONIALS, WHATSAPP,
+        ABOUT_STATS,
+        ABOUT_SUMMARY,
+        CODE_SAMPLE,
+        CV_HIGHLIGHTS,
+        DEVELOPER_NAME,
+        DEVELOPER_NAME_SHORT,
+        DEVELOPER_ROLE,
+        EMAIL,
+        EXPERIENCE,
+        GITHUB_URL,
+        HERO_SUMMARY,
+        JOURNEY_PARAGRAPHS,
+        KEYWORDS_GLOBAL,
+        LINKEDIN_URL,
+        LOCATION,
+        PHONE,
+        ROLE_TITLES,
+        SITE_URL,
+        SOCIAL_LINKS,
+        TECHNICAL_SKILLS,
+        WHATSAPP,
     )
-
-
-# ── Helpers ───────────────────────────────────────────────────────────────────
-
-def _section_header(title: str, copy: str) -> Div:
-    return Div(
-        H2(title, cls="section-title text-center"),
-        Div(cls="section-divider mx-auto"),
-        P(copy, cls="section-copy text-center mx-auto"),
-        cls="section-header",
-    )
-
-
-def floating_select_field(
-    name: str,
-    label: str,
-    *options: Any,
-    input_id: str,
-    input_cls: str = "contact-input",
-    wrapper_cls: str = "mt-3",
-    **kwargs: Any,
-) -> Div:
-    select_cls = f"form-select {input_cls}".strip()
-    wrapper = "form-floating"
-    if wrapper_cls:
-        wrapper = f"{wrapper} {wrapper_cls}"
-    return Div(
-        Select(*options, id=input_id, name=name, cls=select_cls, aria_label=label, **kwargs),
-        Label(label, fr=input_id),
-        cls=wrapper,
-    )
-
-
-def floating_textarea_field(
-    name: str,
-    label: str,
-    *,
-    input_id: str,
-    placeholder: str = "",
-    rows: int = 6,
-    required: bool = False,
-    input_cls: str = "contact-input contact-textarea",
-    wrapper_cls: str = "mt-3",
-    **kwargs: Any,
-) -> Div:
-    textarea_cls = f"form-control {input_cls}".strip()
-    wrapper = "form-floating"
-    if wrapper_cls:
-        wrapper = f"{wrapper} {wrapper_cls}"
-    return Div(
-        Textarea(
-            id=input_id,
-            name=name,
-            placeholder=placeholder or label,
-            rows=rows,
-            cls=textarea_cls,
-            required=required,
-            **kwargs,
-        ),
-        Label(label, fr=input_id),
-        cls=wrapper,
-    )
-
-
-def _social_icon(icon: str, href: str, label: str, color: str) -> A:
-    icon_name = {"linkedin": "linkedin", "envelope": "envelope", "email": "envelope"}.get(icon, icon)
-    return Div(
-        Icon(icon_name, cls="social-icon-glyph"),
-        href=href,
-        target="_blank" if href.startswith("http") else None,
-        rel="noreferrer" if href.startswith("http") else None,
-        cls="social-icon-link",
-        style=f"--brand:{color};",
-        aria_label=label,
-        title=label,
-    )
+    from services.content_service import list_pricing_tiers, list_services, list_testimonials
+    from ui.modals import case_study_modal, cv_preview_modal, project_preview_modal, service_modal
+    from ui.portfolio import portfolio_controls
+    from ui.shared import floating_textarea_field, footer, section_header, site_nav, social_icon
 
 
 def _skill_row(skill: Any) -> Div:
@@ -158,94 +117,6 @@ def _stat_card(stat: Any) -> Col:
     )
 
 
-def _project_card(project: Any, span: str) -> Col:
-    sizes = {
-        "wide":  {"lg": 8, "md": 12},
-        "tall":  {"lg": 4, "md": 12},
-        "small": {"lg": 4, "md": 6},
-        "large": {"lg": 8, "md": 6},
-    }
-    # Build hover overlay buttons
-    hover_buttons = []
-    if hasattr(project, "github_url") and project.github_url:
-        hover_buttons.append(
-            A(
-                Icon("github", cls="me-2"),
-                "GitHub",
-                href=project.github_url,
-                target="_blank",
-                rel="noreferrer",
-                cls="btn project-hover-btn project-hover-btn-github",
-            )
-        )
-    else:
-        # Always show GitHub button (links to profile if no project URL)
-        hover_buttons.append(
-            A(
-                Icon("github", cls="me-2"),
-                "GitHub",
-                href=GITHUB_URL,
-                target="_blank",
-                rel="noreferrer",
-                cls="btn project-hover-btn project-hover-btn-github",
-                title="View on GitHub",
-            )
-        )
-    if hasattr(project, "live_url") and project.live_url:
-        hover_buttons.append(
-            A(
-                Icon("box-arrow-up-right", cls="me-2"),
-                "Live Demo",
-                href=project.live_url,
-                target="_blank",
-                rel="noreferrer",
-                cls="btn project-hover-btn project-hover-btn-live",
-            )
-        )
-    return Col(
-        Card(
-            Div(
-                Img(src=project.image, alt=project.title, cls="project-image", loading="lazy"),
-                Div(cls="project-image-overlay"),
-                # Hover action layer
-                Div(
-                    *hover_buttons,
-                    cls="project-hover-layer",
-                ),
-                cls="project-image-wrap",
-            ),
-            Div(
-                Div(
-                    Span(project.category.replace("-", " ").title(), cls="project-category-pill"),
-                    Span("Featured", cls="project-featured-pill") if project.featured else "",
-                    cls="project-meta-row",
-                ),
-                H3(project.title, cls="project-title"),
-                P(project.summary, cls="project-summary"),
-                Div(*[Span(item, cls="project-tech-pill") for item in project.tech], cls="project-tech-row"),
-                Div(
-                    Button(
-                        "Preview",
-                        type="button",
-                        cls="btn project-action-btn btn-sm",
-                        data_bs_toggle="modal",
-                        data_bs_target="#projectPreviewModal",
-                        hx_get=f"/project-preview?slug={project.slug}",
-                        hx_target="#project-preview-body",
-                        hx_swap="innerHTML",
-                    ),
-                    A("Case Study →", href=f"/project/{project.slug}",
-                      cls="btn project-action-btn project-action-outline btn-sm"),
-                    cls="project-actions d-flex gap-2 mt-3",
-                ),
-                cls="project-card-body",
-            ),
-            cls=f"project-card project-card-{span} h-100 reveal-block",
-        ),
-        span=12, **sizes[span],
-    )
-
-
 def _resume_metrics(downloads: dict[str, int]) -> Div:
     return Div(
         Div(Span("PDF", cls="analytics-key"), Span(str(downloads["pdf"]), cls="analytics-value"), cls="analytics-row"),
@@ -256,152 +127,6 @@ def _resume_metrics(downloads: dict[str, int]) -> Div:
     )
 
 
-# ── Portfolio grid and controls ───────────────────────────────────────────────
-
-def portfolio_grid(active_filter: str) -> Div:
-    items = PROJECTS if active_filter == "all" else tuple(
-        p for p in PROJECTS if p.category == active_filter
-    )
-    spans = ("wide", "tall", "wide", "tall", "small", "large", "wide", "tall", "small", "large", "wide", "tall")
-    if not items:
-        return Div(
-            EmptyState(
-                title="No projects in this category yet.",
-                description="Try another filter to explore the rest of the work.",
-                cls="project-card portfolio-empty-card py-5",
-            ),
-            id="portfolio-grid",
-            cls="portfolio-grid-shell",
-        )
-    return Div(
-        Row(*[_project_card(p, spans[i % len(spans)]) for i, p in enumerate(items)], cls="g-4"),
-        id="portfolio-grid",
-        cls="portfolio-grid-shell",
-    )
-
-
-def portfolio_controls(active_filter: str) -> Div:
-    buttons = [
-        Button(
-            label,
-            type="button",
-            variant="outline-secondary",
-            cls=f"portfolio-toggle-btn{' active' if slug == active_filter else ''}",
-            hx_get=f"/portfolio-grid?filter={slug}",
-            hx_target="#portfolio-grid",
-            hx_swap="outerHTML",
-        )
-        for slug, label in PORTFOLIO_FILTERS
-    ]
-    active_index = next((i for i, (slug, _) in enumerate(PORTFOLIO_FILTERS) if slug == active_filter), 0)
-    return Div(
-        ToggleGroup(
-            *buttons,
-            values=[slug for slug, _ in PORTFOLIO_FILTERS],
-            active_index=active_index,
-            active_cls="active",
-            hidden_input=False,
-            cls="portfolio-toggle-group",
-        ),
-        portfolio_grid(active_filter),
-        id="portfolio-controls-shell",
-        cls="portfolio-controls-shell",
-    )
-
-
-# ── Navigation ────────────────────────────────────────────────────────────────
-
-def _mo_logo() -> Span:
-    """Stylised 'MO' monogram logo mark for shared navbar branding."""
-    return Span(
-        Span("M", cls="mo-logo-m"),
-        Span("O", cls="mo-logo-o"),
-        cls="mo-logo",
-    )
-
-
-def _shared_nav(
-    current: str = "",
-    *,
-    home: bool = False,
-    include_download: bool = False,
-    always_visible: bool = False,
-) -> Nav:
-    links = (
-        [
-            ("Home", "#hero"),
-            ("About", "#about"),
-            ("Services", "#services"),
-            ("Portfolio", "#portfolio"),
-            ("Blog", "/blog"),
-            ("CV", "/cv"),
-            ("Contact", "#contact"),
-        ]
-        if home
-        else [
-            ("Home", "/"),
-            ("Blog", "/blog"),
-            ("CV", "/cv"),
-            ("Book", "/book"),
-            ("Contact", "/#contact"),
-        ]
-    )
-
-    nav_links = Div(
-        *[
-            A(
-                label,
-                href=href,
-                cls=f"nav-link-item{' active' if current and href == current else ''}",
-            )
-            for label, href in links
-        ],
-        cls="navbar-nav neo-nav-links ms-auto align-items-lg-center",
-    )
-
-    actions: list[Any] = []
-    if include_download:
-        actions.append(
-            A(
-                Icon("download", cls="me-2"),
-                "Download PDF",
-                href="/resume/download/pdf",
-                cls="btn hero-primary-btn btn-sm d-none d-lg-inline-flex",
-            )
-        )
-    actions.append(A("Book a Call", href="/book", cls="btn talk-button"))
-
-    nav_cls = "neo-glass-nav"
-    if always_visible:
-        nav_cls += " is-always-visible"
-
-    return Navbar(
-        nav_links,
-        Div(*actions, cls="neo-nav-actions d-flex align-items-center gap-2 flex-wrap ms-lg-3 mt-3 mt-lg-0"),
-        brand=_mo_logo(),
-        brand_href="#hero" if home else "/",
-        variant="dark",
-        expand="lg",
-        id="site-nav",
-        cls=nav_cls,
-    )
-
-
-def site_nav() -> Nav:
-    return _shared_nav(home=True)
-
-
-def shared_inner_nav(current: str = "", *, include_download: bool = False) -> Nav:
-    return _shared_nav(current, include_download=include_download, always_visible=True)
-
-
-# Exported alias used by blog/cv/booking pages
-def _page_nav_full() -> Nav:
-    return site_nav()
-
-
-# ── Sections ──────────────────────────────────────────────────────────────────
-
 def hero_section() -> Section:
     return Section(
         Div(id="page-loader", cls="page-loader"),
@@ -410,7 +135,6 @@ def hero_section() -> Section:
         Div(cls="hero-particles", id="hero-particles"),
         Container(
             Row(
-                # ── Left: text content ──
                 Col(
                     Div(
                         Span("Available for work", cls="hero-availability-badge"),
@@ -422,13 +146,13 @@ def hero_section() -> Section:
                         P(Span(ROLE_TITLES[0], id="hero-role"), cls="hero-role"),
                         P(HERO_SUMMARY, cls="hero-summary"),
                         Div(
-                            A("View My Work",  href="#portfolio",         cls="btn hero-primary-btn cta-pulse"),
-                            A("Download CV",   href="/resume/download/pdf", cls="btn hero-secondary-btn", data_download_format="pdf"),
+                            A("View My Work", href="#portfolio", cls="btn hero-primary-btn cta-pulse"),
+                            A("Download CV", href="/resume/download/pdf", cls="btn hero-secondary-btn", data_download_format="pdf"),
                             A(Icon("whatsapp", cls="me-1"), "Book a Call", href="/book", cls="btn hero-tertiary-btn"),
                             cls="hero-action-row",
                         ),
                         Div(
-                            *[_social_icon(icon, href, label, color) for icon, href, label, color in SOCIAL_LINKS],
+                            *[social_icon(icon, href, label, color) for icon, href, label, color in SOCIAL_LINKS],
                             cls="hero-social-row",
                         ),
                         A(Span(cls="scroll-indicator-inner"), href="#about", cls="scroll-indicator"),
@@ -436,7 +160,6 @@ def hero_section() -> Section:
                     ),
                     span=12, lg=7, cls="d-flex align-items-center",
                 ),
-                # ── Right: avatar orb ──
                 Col(
                     Div(
                         Div(
@@ -450,7 +173,6 @@ def hero_section() -> Section:
                             ),
                             cls="hero-orb-frame",
                         ),
-                        # Floating stat badges
                         Div(
                             Span("10+", cls="hero-float-num"),
                             Span("Projects", cls="hero-float-label"),
@@ -476,7 +198,7 @@ def hero_section() -> Section:
 def about_section() -> Section:
     return Section(
         Container(
-            _section_header("About Me", ABOUT_SUMMARY),
+            section_header("About Me", ABOUT_SUMMARY),
             Row(
                 Col(
                     Div(
@@ -527,10 +249,12 @@ def about_section() -> Section:
 def services_section() -> Section:
     flow = (
         ("Discover", "Clarify the product signal, users, and technical constraints."),
-        ("Design",   "Shape the system, interactions, and delivery plan together."),
-        ("Build",    "Implement with clear milestones, quality checks, and polish."),
-        ("Launch",   "Ship with metrics, fixes, and room to evolve safely."),
+        ("Design", "Shape the system, interactions, and delivery plan together."),
+        ("Build", "Implement with clear milestones, quality checks, and polish."),
+        ("Launch", "Ship with metrics, fixes, and room to evolve safely."),
     )
+    services = list_services()
+    pricing_tiers = list_pricing_tiers()
     service_cards = [
         Card(
             Div(
@@ -561,7 +285,7 @@ def services_section() -> Section:
             ),
             cls="service-card h-100 reveal-block",
         )
-        for service in SERVICES
+        for service in services
     ]
     pricing_cards = [
         Card(
@@ -579,13 +303,13 @@ def services_section() -> Section:
             ),
             cls=f"pricing-card h-100 reveal-block{' pricing-card-featured' if index == 1 else ''}",
         )
-        for index, tier in enumerate(PRICING_TIERS)
+        for index, tier in enumerate(pricing_tiers)
     ]
     return Section(
         Container(
-            _section_header(
+            section_header(
                 "My Services",
-                "Full-stack, AI, and consulting services for serious products — built in Python, shipped on time.",
+                "Full-stack, AI, and consulting services for serious products - built in Python, shipped on time.",
             ),
             FeatureGrid(*service_cards, columns=2, row_cls="g-4 services-grid-row"),
             Div(
@@ -627,9 +351,9 @@ def services_section() -> Section:
 def portfolio_section(active_filter: str) -> Section:
     return Section(
         Container(
-            _section_header(
+            section_header(
                 "My Portfolio",
-                "A selection of real projects — AI agents, biometric systems, SaaS platforms, and more.",
+                "A selection of real projects - AI agents, biometric systems, SaaS platforms, and more.",
             ),
             portfolio_controls(active_filter),
             Div(
@@ -643,6 +367,7 @@ def portfolio_section(active_filter: str) -> Section:
 
 
 def testimonials_section() -> Div:
+    testimonials = list_testimonials()
     return Section(
         Div(
             TestimonialSection(
@@ -654,7 +379,7 @@ def testimonials_section() -> Div:
                         rating=5,
                         cls="testimonial-card reveal-block",
                     )
-                    for item in TESTIMONIALS
+                    for item in testimonials
                 ],
                 title="Testimonials",
                 subtitle="From people I've built things with.",
@@ -676,7 +401,7 @@ def cv_zone_section(downloads: dict[str, int]) -> Section:
     ]
     return Section(
         Container(
-            _section_header("CV Zone", "Download my full CV, view it online, or see the full interactive version."),
+            section_header("CV Zone", "Download my full CV, view it online, or see the full interactive version."),
             Row(
                 Col(
                     Card(
@@ -684,7 +409,7 @@ def cv_zone_section(downloads: dict[str, int]) -> Section:
                         P("Download a concise PDF, view the full interactive CV, or open a print layout.", cls="panel-copy"),
                         Div(
                             A("Download PDF", href="/resume/download/pdf", cls="btn hero-primary-btn cv-action-btn", data_download_format="pdf"),
-                            A("Full CV →",    href="/cv",                  cls="btn hero-secondary-btn cv-action-btn"),
+                            A("Full CV ->", href="/cv", cls="btn hero-secondary-btn cv-action-btn"),
                             A("Print Version", href="/cv/print", target="_blank", cls="btn hero-secondary-btn cv-action-btn"),
                             cls="cv-action-row",
                         ),
@@ -728,8 +453,7 @@ def contact_section() -> Section:
                 Div(Icon("whatsapp", cls="contact-icon-glyph"), cls="contact-icon-box"),
                 Div(
                     H4("WhatsApp", cls="contact-info-title"),
-                    A(WHATSAPP, href=f"https://wa.me/{WHATSAPP.replace('+','')}", target="_blank",
-                      rel="noreferrer", cls="contact-info-copy"),
+                    A(WHATSAPP, href=f"https://wa.me/{WHATSAPP.replace('+','')}", target="_blank", rel="noreferrer", cls="contact-info-copy"),
                     cls="contact-info-body",
                 ),
                 cls="contact-info-row",
@@ -747,8 +471,16 @@ def contact_section() -> Section:
             cls="contact-info-card contact-map-card reveal-block",
         ),
     ]
-    socials = [_social_icon(icon, href, label, color) for icon, href, label, color in SOCIAL_LINKS]
+    socials = [social_icon(icon, href, label, color) for icon, href, label, color in SOCIAL_LINKS]
     form = Form(
+        Input(
+            type="text",
+            name="company",
+            tabindex="-1",
+            autocomplete="off",
+            aria_hidden="true",
+            cls="d-none",
+        ),
         FloatingLabel(
             "name",
             label="Full Name",
@@ -797,6 +529,8 @@ def contact_section() -> Section:
             cls="btn contact-submit-btn mt-4 cta-pulse",
         ),
         Div(id="contact-result", cls="mt-3"),
+        action="/contact",
+        method="post",
         hx_post="/contact",
         hx_target="#contact-result",
         hx_swap="innerHTML",
@@ -818,7 +552,7 @@ def contact_section() -> Section:
     )
     return Section(
         Container(
-            _section_header("Let's Talk", "Ready to build something? I respond to every serious inquiry within 24 hours."),
+            section_header("Let's Talk", "Ready to build something? I respond to every serious inquiry within 24 hours."),
             Row(
                 Col(
                     Card(H3("Send Me a Message", cls="panel-title contact-title"), form, cls="contact-form-card h-100 reveal-block"),
@@ -835,86 +569,6 @@ def contact_section() -> Section:
         cls="content-section contact-section",
     )
 
-
-def footer() -> Footer:
-    return Footer(
-        Container(
-            Div(
-                P(f"© 2025 {DEVELOPER_NAME_SHORT}. Built with FastHTML + Faststrap.", cls="footer-copy"),
-                Div(
-                    A("Blog",   href="/blog",  cls="footer-link"),
-                    A("CV",     href="/cv",    cls="footer-link"),
-                    A("Book",   href="/book",  cls="footer-link"),
-                    A("GitHub", href=GITHUB_URL, target="_blank", rel="noreferrer", cls="footer-link"),
-                    cls="footer-links d-flex gap-3",
-                ),
-                cls="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3",
-            ),
-        ),
-        cls="site-footer",
-    )
-
-
-# ── Modals ────────────────────────────────────────────────────────────────────
-
-def service_modal() -> Div:
-    return Modal(
-        Div("Select a service to load details.", id="service-detail-body", cls="modal-fragment-shell"),
-        modal_id="serviceModal",
-        title="Service Details",
-        size="lg",
-        centered=True,
-        content_cls="neo-modal-content",
-        header_cls="border-0",
-        close_cls="btn-close-white",
-    )
-
-
-def project_preview_modal() -> Div:
-    return Modal(
-        Div("Preview will load here.", id="project-preview-body", cls="modal-fragment-shell"),
-        modal_id="projectPreviewModal",
-        title="Project Preview",
-        size="xl",
-        centered=True,
-        content_cls="neo-modal-content",
-        header_cls="border-0",
-        close_cls="btn-close-white",
-    )
-
-
-def case_study_modal() -> Div:
-    return Modal(
-        Div("Case study will load here.", id="case-study-body", cls="modal-fragment-shell"),
-        modal_id="caseStudyModal",
-        title="Case Study",
-        size="xl",
-        centered=True,
-        scrollable=True,
-        content_cls="neo-modal-content",
-        header_cls="border-0",
-        close_cls="btn-close-white",
-    )
-
-
-def cv_preview_modal() -> Div:
-    cards = [
-        Div(H4(title, cls="cv-highlight-title"), P(copy, cls="cv-highlight-copy"), cls="cv-highlight-card")
-        for title, copy in CV_HIGHLIGHTS
-    ]
-    return Modal(
-        Div(*cards, cls="cv-preview-grid"),
-        modal_id="cvPreviewModal",
-        title="Interactive CV Preview",
-        size="lg",
-        centered=True,
-        content_cls="neo-modal-content",
-        header_cls="border-0",
-        close_cls="btn-close-white",
-    )
-
-
-# ── Page shell (home) ─────────────────────────────────────────────────────────
 
 def page_shell(active_filter: str, downloads: dict[str, int]) -> tuple[Any, ...]:
     structured_data = {

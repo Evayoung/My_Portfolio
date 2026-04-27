@@ -11,21 +11,23 @@ from fasthtml.common import (
 from faststrap import Card, Col, Container, EmptyState, Icon, Row, SEO, ToggleGroup
 
 try:
-    from ..blog_content import BLOG_CATEGORIES, BLOG_MAP, BLOG_POSTS, BlogPost
+    from ..blog_content import BlogPost
     from ..content import (
         DEVELOPER_NAME, DEVELOPER_NAME_SHORT, DEVELOPER_ROLE,
         EMAIL, GITHUB_URL, LINKEDIN_URL, SITE_URL, SOCIAL_LINKS,
     )
+    from ..services.content_service import get_blog_post, list_blog_categories, list_blog_posts
 except ImportError:
-    from blog_content import BLOG_CATEGORIES, BLOG_MAP, BLOG_POSTS, BlogPost
+    from blog_content import BlogPost
     from content import (
         DEVELOPER_NAME, DEVELOPER_NAME_SHORT, DEVELOPER_ROLE,
         EMAIL, GITHUB_URL, LINKEDIN_URL, SITE_URL, SOCIAL_LINKS,
     )
+    from services.content_service import get_blog_post, list_blog_categories, list_blog_posts
 try:
-    from ..components import shared_inner_nav
+    from ..ui.shared import inner_page_footer, shared_inner_nav
 except ImportError:
-    from components import shared_inner_nav
+    from ui.shared import inner_page_footer, shared_inner_nav
 
 
 # ── Shared nav (pages have a simpler top bar) ─────────────────────────────────
@@ -35,22 +37,7 @@ def _page_nav(current: str = "") -> Nav:
 
 
 def _page_footer() -> Footer:
-    return Footer(
-        Container(
-            Div(
-                Span(f"© 2025 {DEVELOPER_NAME_SHORT}.", cls="footer-copy"),
-                Div(
-                    A("Home", href="/", cls="footer-link"),
-                    A("Blog", href="/blog", cls="footer-link"),
-                    A("CV",   href="/cv",   cls="footer-link"),
-                    A("Book", href="/book", cls="footer-link"),
-                    cls="footer-links",
-                ),
-                cls="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3",
-            ),
-        ),
-        cls="site-footer",
-    )
+    return inner_page_footer()
 
 
 # ── Blog card ─────────────────────────────────────────────────────────────────
@@ -107,16 +94,14 @@ def blog_card(post: BlogPost, featured: bool = False) -> Col:
 # ── Blog index page ───────────────────────────────────────────────────────────
 
 def blog_index_page(active_category: str = "all") -> tuple[Any, ...]:
-    filtered = (
-        BLOG_POSTS if active_category == "all"
-        else tuple(p for p in BLOG_POSTS if p.category == active_category)
-    )
+    blog_categories = list_blog_categories()
+    filtered = list_blog_posts(active_category)
 
     cat_buttons = [
         A(label, href=f"/blog?cat={slug}", cls="btn blog-filter-btn")
-        for slug, label in BLOG_CATEGORIES
+        for slug, label in blog_categories
     ]
-    active_index = next((i for i, (slug, _) in enumerate(BLOG_CATEGORIES) if slug == active_category), 0)
+    active_index = next((i for i, (slug, _) in enumerate(blog_categories) if slug == active_category), 0)
 
     featured = next((p for p in filtered if p.category == "project"), filtered[0]) if filtered else None
 
@@ -141,7 +126,7 @@ def blog_index_page(active_category: str = "all") -> tuple[Any, ...]:
                     Div(
                         H1("From the Build Log", cls="blog-index-title"),
                         P(
-                            "Real articles from building production systems — AI agents, "
+                            "Real articles from building production systems - AI agents, "
                             "offline-first apps, Python full-stack, and security engineering.",
                             cls="blog-index-sub",
                         ),
@@ -149,7 +134,7 @@ def blog_index_page(active_category: str = "all") -> tuple[Any, ...]:
                     ),
                     ToggleGroup(
                         *cat_buttons,
-                        values=[slug for slug, _ in BLOG_CATEGORIES],
+                        values=[slug for slug, _ in blog_categories],
                         active_index=active_index,
                         active_cls="active",
                         hidden_input=False,
@@ -176,7 +161,7 @@ def blog_index_page(active_category: str = "all") -> tuple[Any, ...]:
 # ── Blog post detail ──────────────────────────────────────────────────────────
 
 def blog_post_page(slug: str) -> tuple[Any, ...]:
-    post = BLOG_MAP.get(slug)
+    post = get_blog_post(slug)
     if not post:
         return (
             Title("Post Not Found"),
@@ -189,7 +174,7 @@ def blog_post_page(slug: str) -> tuple[Any, ...]:
                         cls="py-5",
                     ),
                     Div(
-                        A("← Back to Blog", href="/blog", cls="btn hero-secondary-btn mt-3 d-block mx-auto"),
+                        A("Back to Blog", href="/blog", cls="btn hero-secondary-btn mt-3 d-block mx-auto"),
                         cls="text-center",
                         style="max-width:600px;margin:0 auto;",
                     ),
@@ -199,7 +184,7 @@ def blog_post_page(slug: str) -> tuple[Any, ...]:
         )
 
     # Related posts (excluding current)
-    related = [p for p in BLOG_POSTS if p.slug != slug][:3]
+    related = [p for p in list_blog_posts() if p.slug != slug][:3]
 
     cat_colors = {
         "project":   "#19C6F7",
@@ -231,7 +216,7 @@ def blog_post_page(slug: str) -> tuple[Any, ...]:
                     Div(cls="hero-overlay"),
                     Container(
                         Div(
-                            A("← All Articles", href="/blog", cls="btn hero-secondary-btn btn-sm mb-4"),
+                            A("All Articles", href="/blog", cls="btn hero-secondary-btn btn-sm mb-4"),
                             Span(
                                 post.category.replace("-", " ").upper(),
                                 cls="blog-category-chip mb-3 d-inline-block",
@@ -301,7 +286,7 @@ def blog_post_page(slug: str) -> tuple[Any, ...]:
                                         "Based in Ilorin, Nigeria.",
                                         cls="small mt-3 mb-0",
                                     ),
-                                    A("View Full CV →", href="/cv", cls="small neo-link mt-2 d-inline-block"),
+                                    A("View Full CV ->", href="/cv", cls="small neo-link mt-2 d-inline-block"),
                                     cls="post-author-card mb-4",
                                 ),
                                 # Tags
@@ -325,7 +310,7 @@ def blog_post_page(slug: str) -> tuple[Any, ...]:
                                         target="_blank",
                                         rel="noreferrer",
                                     ),
-                                    A("Or book a consultation →", href="/book", cls="small neo-link mt-2 d-inline-block"),
+                                    A("Or book a consultation ->", href="/book", cls="small neo-link mt-2 d-inline-block"),
                                     cls="post-sidebar-card",
                                 ),
                                 cls="post-sidebar sticky-top",
@@ -355,3 +340,4 @@ def blog_post_page(slug: str) -> tuple[Any, ...]:
             cls="neo-app",
         ),
     )
+

@@ -215,6 +215,3 @@ BLOG_POSTS = (
 )
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
-
-BLOG_MAP = {post.slug: post for post in BLOG_POSTS}
-LATEST_POSTS = BLOG_POSTS[:3]
