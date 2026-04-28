@@ -5,7 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 
 from reportlab.lib import colors
-from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
@@ -51,13 +50,12 @@ BASE_DIR = Path(__file__).parent
 OUTPUT_PATH = BASE_DIR / "assets" / "neoportfolio_resume.pdf"
 
 NAVY = colors.HexColor("#07111F")
-NAVY_SOFT = colors.HexColor("#112033")
+NAVY_SOFT = colors.HexColor("#102033")
 CYAN = colors.HexColor("#46C8EE")
 CYAN_SOFT = colors.HexColor("#DFF7FF")
-PAGE_BG = colors.HexColor("#EDF3F8")
-INK = colors.HexColor("#111827")
-MUTED = colors.HexColor("#5F6F83")
-LINE = colors.HexColor("#D7E5EF")
+TEXT = colors.HexColor("#202C3A")
+MUTED = colors.HexColor("#68788B")
+LINE = colors.HexColor("#D8E4EC")
 WHITE = colors.white
 
 
@@ -68,75 +66,81 @@ def styles() -> dict[str, ParagraphStyle]:
             "ResumeName",
             parent=base["Heading1"],
             fontName="Helvetica-Bold",
-            fontSize=23,
+            fontSize=24,
             leading=26,
-            textColor=WHITE,
-            spaceAfter=8,
+            textColor=NAVY,
         ),
         "role": ParagraphStyle(
             "ResumeRole",
             parent=base["BodyText"],
-            fontName="Helvetica-Bold",
-            fontSize=10.5,
-            leading=13,
-            textColor=CYAN,
+            fontName="Helvetica",
+            fontSize=12.5,
+            leading=15,
+            textColor=colors.HexColor("#0D7E9D"),
         ),
         "contact": ParagraphStyle(
             "ResumeContact",
             parent=base["BodyText"],
             fontName="Helvetica",
-            fontSize=8.1,
-            leading=10.5,
-            textColor=WHITE,
-        ),
-        "summary": ParagraphStyle(
-            "ResumeSummary",
-            parent=base["BodyText"],
-            fontName="Helvetica",
-            fontSize=9.1,
-            leading=14.2,
-            textColor=WHITE,
+            fontSize=8.8,
+            leading=11,
+            textColor=TEXT,
         ),
         "section": ParagraphStyle(
             "ResumeSection",
-            parent=base["Heading2"],
-            fontName="Helvetica-Bold",
-            fontSize=10.4,
-            leading=12,
-            textColor=NAVY,
-            spaceAfter=5,
-            textTransform="uppercase",
-        ),
-        "title": ParagraphStyle(
-            "ResumeTitle",
             parent=base["BodyText"],
             fontName="Helvetica-Bold",
-            fontSize=9.5,
+            fontSize=10.8,
             leading=12,
-            textColor=NAVY,
-        ),
-        "meta": ParagraphStyle(
-            "ResumeMeta",
-            parent=base["BodyText"],
-            fontName="Helvetica",
-            fontSize=8.2,
-            leading=11,
-            textColor=MUTED,
+            textColor=WHITE,
+            alignment=1,
         ),
         "body": ParagraphStyle(
             "ResumeBody",
             parent=base["BodyText"],
             fontName="Helvetica",
-            fontSize=8.5,
-            leading=12.4,
-            textColor=INK,
+            fontSize=9.1,
+            leading=14.2,
+            textColor=TEXT,
         ),
         "small": ParagraphStyle(
             "ResumeSmall",
             parent=base["BodyText"],
             fontName="Helvetica",
-            fontSize=7.8,
-            leading=10.4,
+            fontSize=8.3,
+            leading=11.3,
+            textColor=MUTED,
+        ),
+        "title": ParagraphStyle(
+            "ResumeTitle",
+            parent=base["BodyText"],
+            fontName="Helvetica-Bold",
+            fontSize=9.7,
+            leading=12.2,
+            textColor=NAVY,
+        ),
+        "sub": ParagraphStyle(
+            "ResumeSub",
+            parent=base["BodyText"],
+            fontName="Helvetica-Bold",
+            fontSize=8.6,
+            leading=11,
+            textColor=TEXT,
+        ),
+        "meta": ParagraphStyle(
+            "ResumeMeta",
+            parent=base["BodyText"],
+            fontName="Helvetica",
+            fontSize=8.3,
+            leading=10.6,
+            textColor=MUTED,
+        ),
+        "label": ParagraphStyle(
+            "ResumeLabel",
+            parent=base["BodyText"],
+            fontName="Helvetica-Bold",
+            fontSize=8.2,
+            leading=10,
             textColor=MUTED,
         ),
         "footer": ParagraphStyle(
@@ -146,106 +150,104 @@ def styles() -> dict[str, ParagraphStyle]:
             fontSize=7.7,
             leading=10,
             textColor=MUTED,
-            alignment=TA_CENTER,
+            alignment=1,
         ),
-        "pill": ParagraphStyle(
-            "ResumePill",
+        "chip": ParagraphStyle(
+            "ResumeChip",
             parent=base["BodyText"],
             fontName="Helvetica-Bold",
-            fontSize=8.1,
-            leading=10,
-            textColor=colors.HexColor("#0D6F8B"),
-            alignment=TA_CENTER,
-        ),
-        "period": ParagraphStyle(
-            "ResumePeriod",
-            parent=base["BodyText"],
-            fontName="Helvetica-Bold",
-            fontSize=7.8,
-            leading=9.5,
-            textColor=colors.HexColor("#0C7895"),
-            alignment=TA_CENTER,
-        ),
-        "lang_right": ParagraphStyle(
-            "ResumeLangRight",
-            parent=base["BodyText"],
-            fontName="Helvetica",
-            fontSize=8,
-            leading=10.5,
-            textColor=MUTED,
-            alignment=TA_RIGHT,
+            fontSize=7.9,
+            leading=9.6,
+            textColor=colors.HexColor("#0B6F8A"),
+            alignment=1,
         ),
     }
 
 
-def chip_table(items: list[str], style_map: dict[str, ParagraphStyle], columns: int = 2) -> Table:
-    rows: list[list[Paragraph]] = []
-    for idx in range(0, len(items), columns):
-        chunk = items[idx : idx + columns]
-        row = [Paragraph(item, style_map["contact"]) for item in chunk]
-        if len(row) < columns:
-            row += [Paragraph("", style_map["contact"]) for _ in range(columns - len(row))]
-        rows.append(row)
-    table = Table(rows, colWidths=[82 * mm, 82 * mm][:columns], hAlign="LEFT")
+def _section_banner(title: str, style_map: dict[str, ParagraphStyle]) -> Table:
+    table = Table([[Paragraph(title, style_map["section"])]], colWidths=[170 * mm], hAlign="LEFT")
     table.setStyle(
         TableStyle(
             [
-                ("BACKGROUND", (0, 0), (-1, -1), colors.Color(1, 1, 1, alpha=0.05)),
-                ("BOX", (0, 0), (-1, -1), 0.5, colors.Color(1, 1, 1, alpha=0.12)),
-                ("INNERGRID", (0, 0), (-1, -1), 0.5, colors.Color(1, 1, 1, alpha=0.08)),
-                ("LEFTPADDING", (0, 0), (-1, -1), 8),
-                ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+                ("BACKGROUND", (0, 0), (-1, -1), CYAN),
+                ("LEFTPADDING", (0, 0), (-1, -1), 10),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 10),
                 ("TOPPADDING", (0, 0), (-1, -1), 6),
                 ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
-                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
             ]
         )
     )
     return table
 
 
-def section_heading(title: str, style_map: dict[str, ParagraphStyle]) -> list:
-    return [
-        Paragraph(title, style_map["section"]),
-        HRFlowable(width="100%", thickness=1.2, lineCap="round", color=CYAN, spaceAfter=10),
-    ]
+def _lines(raw: str) -> list[str]:
+    return [line.strip() for line in raw.splitlines() if line.strip()]
 
 
-def card(content: list, *, padding: int = 12) -> Table:
-    table = Table([[content]], colWidths=[None], hAlign="LEFT")
+def _chip_table(values: list[str], style_map: dict[str, ParagraphStyle], *, columns: int = 2) -> Table:
+    rows: list[list[Paragraph]] = []
+    for index in range(0, len(values), columns):
+        chunk = values[index : index + columns]
+        row = [Paragraph(value, style_map["chip"]) for value in chunk]
+        if len(row) < columns:
+            row.extend(Paragraph("", style_map["chip"]) for _ in range(columns - len(row)))
+        rows.append(row)
+    table = Table(rows, colWidths=[84 * mm] * columns, hAlign="LEFT")
     table.setStyle(
         TableStyle(
             [
-                ("BACKGROUND", (0, 0), (-1, -1), WHITE),
-                ("BOX", (0, 0), (-1, -1), 0.7, LINE),
-                ("LEFTPADDING", (0, 0), (-1, -1), padding),
-                ("RIGHTPADDING", (0, 0), (-1, -1), padding),
-                ("TOPPADDING", (0, 0), (-1, -1), padding),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), padding),
+                ("BACKGROUND", (0, 0), (-1, -1), CYAN_SOFT),
+                ("BOX", (0, 0), (-1, -1), 0.6, colors.HexColor("#A1DFF0")),
+                ("INNERGRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#C5EBF5")),
+                ("LEFTPADDING", (0, 0), (-1, -1), 8),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+                ("TOPPADDING", (0, 0), (-1, -1), 5),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
             ]
         )
     )
     return table
 
 
-def experience_card(item: object, style_map: dict[str, ParagraphStyle]) -> KeepTogether:
-    item_top = Table(
-        [[Paragraph(item.title, style_map["title"]), Paragraph(item.period, style_map["period"])]],
-        colWidths=[112 * mm, 42 * mm],
-    )
-    item_top.setStyle(
+def _two_column_skill_table(left_items: list[str], right_items: list[str], style_map: dict[str, ParagraphStyle]) -> Table:
+    max_rows = max(len(left_items), len(right_items), 1)
+    rows = []
+    for index in range(max_rows):
+        left = f"• {left_items[index]}" if index < len(left_items) else ""
+        right = f"• {right_items[index]}" if index < len(right_items) else ""
+        rows.append([Paragraph(left, style_map["body"]), Paragraph(right, style_map["body"])])
+    table = Table(rows, colWidths=[82 * mm, 82 * mm], hAlign="LEFT")
+    table.setStyle(
         TableStyle(
             [
                 ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                ("ALIGN", (1, 0), (1, 0), "RIGHT"),
-                ("BACKGROUND", (1, 0), (1, 0), CYAN_SOFT),
-                ("BOX", (1, 0), (1, 0), 0.5, CYAN),
-                ("LEFTPADDING", (0, 0), (0, 0), 0),
-                ("RIGHTPADDING", (0, 0), (0, 0), 0),
-                ("LEFTPADDING", (1, 0), (1, 0), 6),
-                ("RIGHTPADDING", (1, 0), (1, 0), 6),
-                ("TOPPADDING", (1, 0), (1, 0), 4),
-                ("BOTTOMPADDING", (1, 0), (1, 0), 4),
+                ("LEFTPADDING", (0, 0), (-1, -1), 3),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 3),
+                ("TOPPADDING", (0, 0), (-1, -1), 2),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
+            ]
+        )
+    )
+    return table
+
+
+def _experience_block(item: object, style_map: dict[str, ParagraphStyle]) -> KeepTogether:
+    header = Table(
+        [[
+            Paragraph(f"<b>{item.period}</b>", style_map["sub"]),
+            Paragraph(f"<b>{item.organisation}</b><br/>{item.title}", style_map["title"]),
+        ]],
+        colWidths=[52 * mm, 118 * mm],
+        hAlign="LEFT",
+    )
+    header.setStyle(
+        TableStyle(
+            [
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+                ("TOPPADDING", (0, 0), (-1, -1), 0),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
             ]
         )
     )
@@ -258,102 +260,47 @@ def experience_card(item: object, style_map: dict[str, ParagraphStyle]) -> KeepT
     )
     return KeepTogether(
         [
-            card(
-                [
-                    item_top,
-                    Spacer(1, 4),
-                    Paragraph(f"{item.organisation} &middot; {item.location}", style_map["meta"]),
-                    Spacer(1, 8),
-                    bullets,
-                ]
-            ),
+            header,
+            Spacer(1, 4),
+            Paragraph(item.location, style_map["meta"]),
+            Spacer(1, 6),
+            bullets,
             Spacer(1, 10),
         ]
     )
 
 
-def simple_stack(items: list[tuple[str, str, str | None]], style_map: dict[str, ParagraphStyle]) -> list:
+def _stack_block(items: list[tuple[str, str, str | None]], style_map: dict[str, ParagraphStyle]) -> list:
     flowables: list = []
     for index, (title, subtitle, note) in enumerate(items):
-        content = [
-            Paragraph(title, style_map["title"]),
-            Spacer(1, 3),
-            Paragraph(subtitle, style_map["meta"]),
-        ]
+        flowables.append(Paragraph(title, style_map["title"]))
+        flowables.append(Paragraph(subtitle, style_map["meta"]))
         if note:
-            content.extend([Spacer(1, 5), Paragraph(note, style_map["small"])])
-        flowables.append(card(content, padding=10))
+            flowables.append(Spacer(1, 3))
+            flowables.append(Paragraph(note, style_map["body"]))
         if index < len(items) - 1:
             flowables.append(Spacer(1, 8))
+            flowables.append(HRFlowable(width="100%", thickness=0.5, color=LINE, spaceAfter=8, spaceBefore=0))
     return flowables
 
 
-def pills_grid(values: list[str], style_map: dict[str, ParagraphStyle], column_width: float) -> list:
-    rows: list[list[Paragraph]] = []
-    for value in values:
-        rows.append([Paragraph(value, style_map["pill"])])
-    tables = []
-    for paragraph in rows:
-        table = Table([paragraph], colWidths=[column_width])
-        table.setStyle(
-            TableStyle(
-                [
-                    ("BACKGROUND", (0, 0), (-1, -1), CYAN_SOFT),
-                    ("BOX", (0, 0), (-1, -1), 0.6, colors.HexColor("#9ADDEF")),
-                    ("LEFTPADDING", (0, 0), (-1, -1), 8),
-                    ("RIGHTPADDING", (0, 0), (-1, -1), 8),
-                    ("TOPPADDING", (0, 0), (-1, -1), 4),
-                    ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
-                ]
-            )
-        )
-        tables.extend([table, Spacer(1, 5)])
-    return tables
+def _contact_lines(cv_meta: dict[str, str], style_map: dict[str, ParagraphStyle]) -> list:
+    details = [
+        cv_meta["location"],
+        cv_meta["phone"],
+        cv_meta["email"],
+        cv_meta["linkedin"].replace("https://", "").replace("http://", ""),
+        cv_meta["github"].replace("https://", "").replace("http://", ""),
+    ]
+    return [Paragraph(detail, style_map["contact"]) for detail in details if detail]
 
 
-def language_block(languages: list[tuple[str, str, int]], style_map: dict[str, ParagraphStyle]) -> list:
-    blocks: list = []
-    for index, (name, level, pct) in enumerate(languages):
-        label_row = Table(
-            [[Paragraph(name, style_map["title"]), Paragraph(level, style_map["lang_right"])]],
-            colWidths=[52 * mm, 28 * mm],
-        )
-        label_row.setStyle(
-            TableStyle(
-                [
-                    ("LEFTPADDING", (0, 0), (-1, -1), 0),
-                    ("RIGHTPADDING", (0, 0), (-1, -1), 0),
-                    ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
-                ]
-            )
-        )
-        bar = Table([["", ""]], colWidths=[pct * 0.8 * mm, (100 - pct) * 0.8 * mm], rowHeights=[4.5 * mm])
-        bar.setStyle(
-            TableStyle(
-                [
-                    ("BACKGROUND", (0, 0), (0, 0), CYAN),
-                    ("BACKGROUND", (1, 0), (1, 0), colors.HexColor("#E6EEF4")),
-                    ("LINEBEFORE", (0, 0), (0, 0), 0, WHITE),
-                    ("LINEAFTER", (1, 0), (1, 0), 0, WHITE),
-                    ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-                ]
-            )
-        )
-        blocks.extend([label_row, bar])
-        if index < len(languages) - 1:
-            blocks.append(Spacer(1, 8))
-    return blocks
-
-
-def first_page(canvas, doc) -> None:
+def _footer(canvas, doc) -> None:
     canvas.saveState()
-    canvas.setFillColor(PAGE_BG)
-    canvas.rect(0, 0, A4[0], A4[1], stroke=0, fill=1)
+    canvas.setFont("Helvetica", 8)
+    canvas.setFillColor(MUTED)
+    canvas.drawCentredString(A4[0] / 2, 10 * mm, f"Page {doc.page}")
     canvas.restoreState()
-
-
-def later_pages(canvas, doc) -> None:
-    first_page(canvas, doc)
 
 
 def build_pdf(output_path: Path) -> None:
@@ -367,135 +314,79 @@ def build_pdf(output_path: Path) -> None:
     languages = list_languages()
     s = styles()
 
-    header_left = [
+    left_skills = list(core_skills)
+    right_skills = list(competencies[: len(competencies) // 2]) if competencies else []
+    if competencies:
+        midpoint = max(1, (len(core_skills) + len(competencies)) // 2)
+        combined = list(core_skills) + list(competencies)
+        left_skills = combined[:midpoint]
+        right_skills = combined[midpoint:]
+
+    contact_block = _contact_lines(cv_meta, s)
+    tool_values = [f"{category.label}: {', '.join(category.tools)}" for category in tool_categories]
+    language_values = [f"{name} - {level}" for name, level, _pct in languages]
+
+    story: list = [
         Paragraph(cv_meta["name"], s["name"]),
         Paragraph(cv_meta["role"], s["role"]),
+        Spacer(1, 6),
+        *contact_block,
         Spacer(1, 8),
-        Paragraph(cv_meta["summary"], s["summary"]),
+        HRFlowable(width="100%", thickness=1, color=LINE, spaceAfter=10, spaceBefore=0),
+        _section_banner("Professional Profile", s),
+        Spacer(1, 8),
+        Paragraph(cv_meta["summary"], s["body"]),
         Spacer(1, 12),
-        chip_table(
-            [
-                cv_meta["location"],
-                cv_meta["phone"],
-                cv_meta["email"],
-                cv_meta["github"].replace("https://", ""),
-                cv_meta["linkedin"].replace("https://", ""),
-            ],
-            s,
-        ),
+        _section_banner("Core Skills", s),
+        Spacer(1, 8),
+        _two_column_skill_table(left_skills, right_skills, s),
+        Spacer(1, 12),
+        _section_banner("Career Summary", s),
+        Spacer(1, 10),
     ]
-    brand_mark = Table(
-        [[Paragraph("M", s["period"]), Paragraph("O", s["period"])]],
-        colWidths=[16 * mm, 16 * mm],
-        rowHeights=[16 * mm],
-    )
-    brand_mark.setStyle(
-        TableStyle(
-            [
-                ("BACKGROUND", (0, 0), (-1, -1), CYAN),
-                ("TEXTCOLOR", (0, 0), (-1, -1), NAVY),
-                ("BOX", (0, 0), (-1, -1), 1, NAVY_SOFT),
-                ("INNERGRID", (0, 0), (-1, -1), 1, NAVY_SOFT),
-                ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-            ]
-        )
-    )
-    header = Table([[header_left, brand_mark]], colWidths=[150 * mm, 22 * mm])
-    header.setStyle(
-        TableStyle(
-            [
-                ("BACKGROUND", (0, 0), (-1, -1), NAVY),
-                ("BOX", (0, 0), (-1, -1), 0, NAVY),
-                ("LEFTPADDING", (0, 0), (-1, -1), 16),
-                ("RIGHTPADDING", (0, 0), (-1, -1), 16),
-                ("TOPPADDING", (0, 0), (-1, -1), 16),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 16),
-                ("VALIGN", (0, 0), (-1, -1), "TOP"),
-            ]
-        )
-    )
 
-    experience_flowables = section_heading("Experience", s)
     for item in work_history:
-        experience_flowables.append(experience_card(item, s))
+        story.append(_experience_block(item, s))
 
-    education_flowables = section_heading("Education", s) + simple_stack(
-        [(item.degree, f"{item.institution} | {item.period}", item.note) for item in education],
-        s,
+    story.extend(
+        [
+            _section_banner("Education", s),
+            Spacer(1, 8),
+            *_stack_block(
+                [(item.degree, f"{item.institution} | {item.period}", item.note) for item in education],
+                s,
+            ),
+            Spacer(1, 12),
+            _section_banner("Certifications", s),
+            Spacer(1, 8),
+            *_stack_block(
+                [(item.name, f"{item.issuer} | {item.year}", None) for item in certifications],
+                s,
+            ),
+            Spacer(1, 12),
+            _section_banner("Tools & Technologies", s),
+            Spacer(1, 8),
+            _chip_table(tool_values, s, columns=1),
+            Spacer(1, 12),
+            _section_banner("Languages", s),
+            Spacer(1, 8),
+            _chip_table(language_values, s, columns=1),
+            Spacer(1, 12),
+            Paragraph(f"Portfolio: {SITE_URL.replace('https://', '')}", s["footer"]),
+        ]
     )
-    certifications_flowables = section_heading("Certifications", s) + simple_stack(
-        [(item.name, f"{item.issuer} | {item.year}", None) for item in certifications],
-        s,
-    )
-
-    core_skills_flowables = section_heading("Core Skills", s) + [
-        ListFlowable(
-            [ListItem(Paragraph(skill, s["body"])) for skill in core_skills],
-            bulletType="bullet",
-            leftPadding=12,
-            bulletFontName="Helvetica-Bold",
-            bulletColor=CYAN,
-        )
-    ]
-    tool_flowables = section_heading("Tools & Technologies", s)
-    for category in tool_categories:
-        tool_flowables.extend(
-            [
-                Paragraph(category.label, s["meta"]),
-                Spacer(1, 4),
-                Table(
-                    [[Paragraph(", ".join(category.tools), s["body"])]],
-                    colWidths=[None],
-                    style=TableStyle(
-                        [
-                            ("BACKGROUND", (0, 0), (-1, -1), CYAN_SOFT),
-                            ("BOX", (0, 0), (-1, -1), 0.5, colors.HexColor("#9ADDEF")),
-                            ("LEFTPADDING", (0, 0), (-1, -1), 8),
-                            ("RIGHTPADDING", (0, 0), (-1, -1), 8),
-                            ("TOPPADDING", (0, 0), (-1, -1), 6),
-                            ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
-                        ]
-                    ),
-                ),
-                Spacer(1, 7),
-            ]
-        )
-
-    competencies_flowables = section_heading("Competencies", s) + pills_grid(list(competencies), s, 74 * mm)
-    languages_flowables = section_heading("Languages", s) + language_block(list(languages), s)
-
-    story = [
-        header,
-        Spacer(1, 14),
-        *experience_flowables,
-        Spacer(1, 8),
-        *education_flowables,
-        Spacer(1, 6),
-        *certifications_flowables,
-        Spacer(1, 6),
-        *core_skills_flowables,
-        Spacer(1, 6),
-        *tool_flowables,
-        Spacer(1, 6),
-        *competencies_flowables,
-        Spacer(1, 6),
-        *languages_flowables,
-        Spacer(1, 12),
-        Paragraph(f"Portfolio: {SITE_URL.replace('https://', '')}", s["footer"]),
-    ]
 
     doc = SimpleDocTemplate(
         str(output_path),
         pagesize=A4,
-        leftMargin=10 * mm,
-        rightMargin=10 * mm,
-        topMargin=10 * mm,
-        bottomMargin=10 * mm,
+        leftMargin=20 * mm,
+        rightMargin=20 * mm,
+        topMargin=18 * mm,
+        bottomMargin=18 * mm,
         title=f"{cv_meta['name']} CV",
         author=cv_meta["name"],
     )
-    doc.build(story, onFirstPage=first_page, onLaterPages=later_pages)
+    doc.build(story, onFirstPage=_footer, onLaterPages=_footer)
 
 
 def main() -> None:

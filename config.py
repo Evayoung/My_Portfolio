@@ -28,6 +28,8 @@ class Settings:
     supabase_url: str = os.getenv("SUPABASE_URL", "")
     supabase_anon_key: str = os.getenv("SUPABASE_ANON_KEY", "")
     supabase_service_role_key: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+    github_username: str = os.getenv("GITHUB_USERNAME", "Evayoung")
+    github_access_token: str = os.getenv("GITHUB_ACCESS_TOKEN", "")
 
 
 settings = Settings()

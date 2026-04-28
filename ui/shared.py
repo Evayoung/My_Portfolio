@@ -6,6 +6,7 @@ from typing import Any
 
 from fasthtml.common import *
 from faststrap import Icon, Navbar
+from faststrap.presets import LoadingButton
 
 try:
     from ..content import DEVELOPER_NAME_SHORT, GITHUB_URL
@@ -232,4 +233,28 @@ def footer() -> Footer:
             ),
         ),
         cls="site-footer",
+    )
+
+
+def loading_fragment_button(
+    label: str,
+    *,
+    endpoint: str,
+    target: str,
+    icon: str | None = None,
+    button_cls: str = "btn contact-submit-btn mt-4 cta-pulse",
+    variant: str = "primary",
+) -> Any:
+    children: list[Any] = []
+    if icon:
+        children.append(Icon(icon, cls="contact-submit-icon"))
+    children.append(label)
+    return LoadingButton(
+        *children,
+        endpoint=endpoint,
+        target=target,
+        method="post",
+        variant=variant,
+        hx_include="closest form",
+        cls=button_cls,
     )

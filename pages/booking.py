@@ -23,9 +23,9 @@ except ImportError:
     )
     from services.content_service import list_services
 try:
-    from ..ui.shared import floating_select_field, floating_textarea_field, inner_page_footer, shared_inner_nav
+    from ..ui.shared import floating_select_field, floating_textarea_field, inner_page_footer, loading_fragment_button, shared_inner_nav
 except ImportError:
-    from ui.shared import floating_select_field, floating_textarea_field, inner_page_footer, shared_inner_nav
+    from ui.shared import floating_select_field, floating_textarea_field, inner_page_footer, loading_fragment_button, shared_inner_nav
 
 
 def _book_nav() -> Nav:
@@ -302,11 +302,11 @@ def booking_page() -> tuple[Any, ...]:
                                     ),
 
                                     # Submit
-                                    Button(
-                                        Icon("send", cls="me-2"),
+                                    loading_fragment_button(
                                         "Send Project Brief",
-                                        type="submit",
-                                        cls="btn contact-submit-btn mt-4 cta-pulse",
+                                        endpoint="/book/submit",
+                                        target="#brief-result",
+                                        icon="send",
                                     ),
                                     Div(id="brief-result", cls="mt-3"),
                                     action="/book/submit",

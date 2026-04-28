@@ -50,6 +50,7 @@ def test_home_contains_key_sections() -> None:
     assert "Testimonials" in html
     assert "CV Zone" in html
     assert "Let's Talk" in html
+    assert "Recent Commits" in html or "Active SaaS Products" in html
 
 
 def test_filter_fragment_changes_projects() -> None:
@@ -179,6 +180,16 @@ def test_forms_use_consistent_floating_label_markup() -> None:
         assert 'class="form-floating' in html
         assert f'for="{field_id}"' in html
         assert 'contact-textarea mt-3' not in html
+
+
+def test_public_forms_use_loading_button_htmx_pattern() -> None:
+    home = client.get("/")
+    book = client.get("/book")
+
+    assert 'hx-post="/contact"' in home.text
+    assert 'hx-disabled-elt="this"' in home.text
+    assert 'hx-post="/book/submit"' in book.text
+    assert 'hx-disabled-elt="this"' in book.text
 
 
 def test_inner_page_layouts_keep_responsive_column_classes() -> None:

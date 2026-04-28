@@ -261,9 +261,27 @@ def setup_routes(app: Any, asset_dir: Path) -> None:
 
     @app.get("/resume/download/{format}")
     def resume_download(format: str) -> Any:
-        pdf_path = asset_dir / "neoportfolio_resume.pdf"
-        if format == "pdf" and pdf_path.exists():
-            return FileResponse(pdf_path, filename="Olorundare-Micheal-Babawale-CV.pdf", media_type="application/pdf")
+        if format == "pdf":
+            import os as _os
+            from pathlib import Path as _Path
+            tmp_dir = _Path("/tmp") if _os.getenv("VERCEL") else (asset_dir / "generated")
+            tmp_dir.mkdir(parents=True, exist_ok=True)
+            pdf_path = tmp_dir / "neoportfolio_resume.pdf"
+            try:
+                try:
+                    from .generate_resume_pdf import build_pdf
+                except ImportError:
+                    from generate_resume_pdf import build_pdf
+                build_pdf(pdf_path)
+            except Exception:  # noqa: BLE001 — fallback to pre-built if generation fails
+                pdf_path = asset_dir / "neoportfolio_resume.pdf"
+            if pdf_path.exists():
+                return FileResponse(
+                    pdf_path,
+                    filename="Olorundare-Micheal-Babawale-CV.pdf",
+                    media_type="application/pdf",
+                )
+            return JSONResponse({"error": "PDF could not be generated"}, status_code=500)
         if format == "web":
             return HTMLResponse(resume_html(get_cv_meta(), print_mode=False))
         if format == "print":
