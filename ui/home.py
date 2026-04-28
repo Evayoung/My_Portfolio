@@ -49,7 +49,6 @@ try:
     )
     from ..services.content_service import list_pricing_tiers, list_services, list_testimonials
     from ..services.github_service import get_about_stats
-    from ..ui.github_widget import github_compact_widget
     from .modals import case_study_modal, cv_preview_modal, project_preview_modal, service_modal
     from .portfolio import portfolio_controls
     from .shared import floating_textarea_field, footer, loading_fragment_button, section_header, site_nav, social_icon
@@ -79,7 +78,6 @@ except ImportError:
     )
     from services.content_service import list_pricing_tiers, list_services, list_testimonials
     from services.github_service import get_about_stats
-    from ui.github_widget import github_compact_widget
     from ui.modals import case_study_modal, cv_preview_modal, project_preview_modal, service_modal
     from ui.portfolio import portfolio_controls
     from ui.shared import floating_textarea_field, footer, loading_fragment_button, section_header, site_nav, social_icon
@@ -610,7 +608,6 @@ def page_shell(active_filter: str, downloads: dict[str, int]) -> tuple[Any, ...]
             services_section(),
             portfolio_section(active_filter),
             testimonials_section(),
-            github_compact_widget(),
             cv_zone_section(downloads),
             contact_section(),
             footer(),
