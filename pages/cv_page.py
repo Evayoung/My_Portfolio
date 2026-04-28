@@ -44,10 +44,8 @@ except ImportError:
     )
 try:
     from ..ui.shared import inner_page_footer, shared_inner_nav
-    from ..ui.github_widget import github_full_section
 except ImportError:
     from ui.shared import inner_page_footer, shared_inner_nav
-    from ui.github_widget import github_full_section
 
 
 def _cv_nav() -> Nav:
@@ -347,7 +345,6 @@ def cv_page() -> tuple[Any, ...]:
             ),
 
             # ── GitHub Activity ──────────────────────────────────────────────────
-            github_full_section(),
 
             # ── Footer ──────────────────────────────────────────────────────────
             inner_page_footer(inline=True),
