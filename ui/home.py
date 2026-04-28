@@ -131,7 +131,17 @@ def _resume_metrics(downloads: dict[str, int]) -> Div:
     )
 
 
+def _hero_name_parts() -> tuple[str, str]:
+    parts = [part for part in DEVELOPER_NAME_SHORT.split() if part]
+    if not parts:
+        return ("Micheal", "Olorundare")
+    if len(parts) == 1:
+        return (parts[0], "")
+    return (parts[0], " ".join(parts[1:]))
+
+
 def hero_section() -> Section:
+    first_name, last_name = _hero_name_parts()
     return Section(
         Div(id="page-loader", cls="page-loader"),
         Div(cls="hero-background"),
@@ -143,8 +153,8 @@ def hero_section() -> Section:
                     Div(
                         Span("Available for work", cls="hero-availability-badge"),
                         H1(
-                            Span(DEVELOPER_NAME_SHORT.split()[0] + " ", cls="hero-name-first"),
-                            Span(DEVELOPER_NAME_SHORT.split()[1], cls="hero-name-last"),
+                            Span(f"{first_name} " if last_name else first_name, cls="hero-name-first"),
+                            Span(last_name, cls="hero-name-last") if last_name else "",
                             cls="hero-name",
                         ),
                         P(Span(ROLE_TITLES[0], id="hero-role"), cls="hero-role"),
