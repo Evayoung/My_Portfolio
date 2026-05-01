@@ -48,9 +48,17 @@ except ImportError:
 
 DOWNLOAD_COUNTS = {"pdf": 0, "web": 0, "print": 0}
 
-SERVICE_MAP = {item.slug: item for item in list_services()}
-PROJECT_MAP = {item.slug: item for item in list_projects()}
-VALID_FILTERS = {slug for slug, _ in get_portfolio_filters()}
+
+def _service_map() -> dict[str, Any]:
+    return {item.slug: item for item in list_services()}
+
+
+def _project_map() -> dict[str, Any]:
+    return {item.slug: item for item in list_projects()}
+
+
+def _valid_filters() -> set[str]:
+    return {slug for slug, _ in get_portfolio_filters()}
 
 
 def _wa_link(message: str) -> str:
@@ -123,7 +131,7 @@ def setup_routes(app: Any, asset_dir: Path) -> None:
 
     @app.get("/")
     def home(filter: str = "all") -> Any:
-        active = filter if filter in VALID_FILTERS else "all"
+        active = filter if filter in _valid_filters() else "all"
         return page_shell(active, DOWNLOAD_COUNTS)
 
     @app.get("/blog")
@@ -152,25 +160,25 @@ def setup_routes(app: Any, asset_dir: Path) -> None:
 
     @app.get("/portfolio-grid")
     def portfolio_grid_fragment(filter: str = "all") -> Any:
-        active = filter if filter in VALID_FILTERS else "all"
+        active = filter if filter in _valid_filters() else "all"
         return portfolio_grid(active)
 
     @app.get("/portfolio-controls")
     def portfolio_controls_fragment(filter: str = "all") -> Any:
-        active = filter if filter in VALID_FILTERS else "all"
+        active = filter if filter in _valid_filters() else "all"
         return portfolio_controls(active)
 
     @app.get("/service-detail")
     def service_detail(slug: str = "") -> Any:
-        return service_detail_fragment(slug, SERVICE_MAP)
+        return service_detail_fragment(slug, _service_map())
 
     @app.get("/project-preview")
     def project_preview(slug: str = "") -> Any:
-        return project_preview_fragment(slug, PROJECT_MAP)
+        return project_preview_fragment(slug, _project_map())
 
     @app.get("/project-case-study")
     def project_case_study(slug: str = "") -> Any:
-        return project_case_study_fragment(slug, PROJECT_MAP)
+        return project_case_study_fragment(slug, _project_map())
 
     @app.post("/contact")
     def contact(

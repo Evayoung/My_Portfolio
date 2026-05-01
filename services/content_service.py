@@ -74,7 +74,7 @@ def _safe_load(loader, fallback):
     try:
         loaded = loader()
         return loaded if loaded else fallback
-    except (HTTPError, URLError, TimeoutError, ValueError, KeyError, TypeError):
+    except (HTTPError, URLError, TimeoutError, OSError, ValueError, KeyError, TypeError):
         return fallback
 
 

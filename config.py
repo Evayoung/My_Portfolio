@@ -14,9 +14,10 @@ except ImportError:  # pragma: no cover
 
 
 BASE_DIR = Path(__file__).resolve().parent
-load_dotenv(BASE_DIR / ".env")
-if not (BASE_DIR / ".env").exists():
-    load_dotenv(BASE_DIR.parent / "neo-admin" / ".env")
+if not os.getenv("VERCEL"):
+    load_dotenv(BASE_DIR / ".env")
+    if not (BASE_DIR / ".env").exists():
+        load_dotenv(BASE_DIR.parent / "neo-admin" / ".env")
 
 
 @dataclass(frozen=True)
@@ -33,3 +34,19 @@ class Settings:
 
 
 settings = Settings()
+
+
+def _validate_production_settings() -> None:
+    if not os.getenv("VERCEL"):
+        return
+    if settings.secret_key in {"", "neoportfolio-secret-2025", "replace-with-a-secure-secret"}:
+        raise RuntimeError("NEOPORTFOLIO_SECRET_KEY must be set to a secure value in production.")
+    if settings.supabase_url in {"", "https://your-project-id.supabase.co"}:
+        raise RuntimeError("SUPABASE_URL must be set in production.")
+    if settings.supabase_anon_key in {"", "your-public-anon-key"}:
+        raise RuntimeError("SUPABASE_ANON_KEY must be set in production.")
+    if settings.supabase_service_role_key in {"", "your-service-role-key"}:
+        raise RuntimeError("SUPABASE_SERVICE_ROLE_KEY must be set in production.")
+
+
+_validate_production_settings()

@@ -274,3 +274,14 @@ def test_pdf_download_route_serves_real_pdf_asset() -> None:
 def test_public_env_template_exists() -> None:
     root = Path(__file__).parent
     assert (root / ".env.example").exists()
+
+
+def test_vercel_deploy_excludes_local_env_and_validates_runtime_env() -> None:
+    root = Path(__file__).parent
+    vercelignore = (root / ".vercelignore").read_text()
+    config = (root / "config.py").read_text()
+
+    assert ".env" in vercelignore
+    assert 'if not os.getenv("VERCEL")' in config
+    assert "NEOPORTFOLIO_SECRET_KEY must be set" in config
+    assert "SUPABASE_SERVICE_ROLE_KEY must be set" in config

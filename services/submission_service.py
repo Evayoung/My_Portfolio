@@ -80,7 +80,7 @@ def submit_contact_inquiry(*, name: str, email: str, subject: str, message: str)
             message="I couldn't store your message directly just now, so use the backup send options below instead and nothing gets lost.",
             stored=False,
         )
-    except (URLError, TimeoutError, ValueError):
+    except (URLError, TimeoutError, OSError, ValueError):
         return SubmissionResult(
             success=False,
             tone="warning",
@@ -139,7 +139,7 @@ def submit_booking_request(
             message="I couldn't store your brief directly just now, so use the backup send options below instead and nothing gets lost.",
             stored=False,
         )
-    except (URLError, TimeoutError, ValueError):
+    except (URLError, TimeoutError, OSError, ValueError):
         return SubmissionResult(
             success=False,
             tone="warning",
