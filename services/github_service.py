@@ -53,7 +53,10 @@ def _request(path: str) -> object:
 
 @lru_cache(maxsize=1)
 def get_github_snapshot() -> GitHubSnapshot:
+    import sys
     username = _derive_username()
+    has_token = bool(settings.github_access_token.strip())
+    print(f"[github_service] username={username} has_token={has_token}", file=sys.stderr)
     try:
         profile = _request(f"/users/{username}")
         repos = _request(f"/users/{username}/repos?per_page=100&type=owner&sort=updated")
@@ -66,6 +69,7 @@ def get_github_snapshot() -> GitHubSnapshot:
             for event in events
             if isinstance(event, dict) and event.get("type") == "PushEvent"
         )
+        print(f"[github_service] repos={profile.get('public_repos')} commits={recent_commits} source=github", file=sys.stderr)
         return GitHubSnapshot(
             username=username,
             public_repos=int(profile.get("public_repos") or 0),
@@ -75,7 +79,8 @@ def get_github_snapshot() -> GitHubSnapshot:
             recent_commits=recent_commits,
             source="github",
         )
-    except (HTTPError, URLError, TimeoutError, ValueError, KeyError, TypeError, json.JSONDecodeError):
+    except (HTTPError, URLError, TimeoutError, ValueError, KeyError, TypeError, json.JSONDecodeError) as exc:
+        print(f"[github_service] API call failed: {exc} — falling back to static stats", file=sys.stderr)
         return GitHubSnapshot(
             username=username,
             public_repos=0,
