@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Any
 
 from fasthtml.common import *
-from faststrap import Icon, Navbar
+from faststrap import Container, Icon, Navbar
 from faststrap.presets import LoadingButton
 
 try:
