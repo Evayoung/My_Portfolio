@@ -22,7 +22,7 @@ if not os.getenv("VERCEL"):
 
 @dataclass(frozen=True)
 class Settings:
-    secret_key: str = os.getenv("NEOPORTFOLIO_SECRET_KEY", "neoportfolio-secret-2025")
+    secret_key: str = os.getenv("NEOPORTFOLIO_SECRET_KEY", "")
     session_cookie: str = "neoportfolio_session"
     use_cdn: bool = bool(os.getenv("VERCEL"))
     port: int = int(os.getenv("PORT", "5062"))
@@ -37,9 +37,21 @@ settings = Settings()
 
 
 def _validate_production_settings() -> None:
+    import warnings
+
+    # Always warn about insecure defaults (not just on Vercel)
+    if not settings.secret_key:
+        warnings.warn(
+            "NEOPORTFOLIO_SECRET_KEY is not set. Sessions are insecure. "
+            "Set it in your .env file.",
+            stacklevel=2,
+        )
+
     if not os.getenv("VERCEL"):
         return
-    if settings.secret_key in {"", "neoportfolio-secret-2025", "replace-with-a-secure-secret"}:
+
+    # Production: raise errors
+    if not settings.secret_key:
         raise RuntimeError("NEOPORTFOLIO_SECRET_KEY must be set to a secure value in production.")
     if settings.supabase_url in {"", "https://your-project-id.supabase.co"}:
         raise RuntimeError("SUPABASE_URL must be set in production.")

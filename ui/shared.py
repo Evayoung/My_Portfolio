@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Any
 
 from fasthtml.common import *
@@ -12,6 +13,8 @@ try:
     from ..content import DEVELOPER_NAME_SHORT, GITHUB_URL
 except ImportError:
     from content import DEVELOPER_NAME_SHORT, GITHUB_URL
+
+CURRENT_YEAR = str(datetime.now().year)
 
 
 def section_header(title: str, copy: str) -> Div:
@@ -188,7 +191,7 @@ def inner_page_footer(*, inline: bool = False, include_book: bool = True) -> Foo
         links.append(A("Book", href="/book", cls="footer-link"))
 
     if inline:
-        footer_children: list[Any] = [f"{copyright_mark} 2025 {DEVELOPER_NAME_SHORT} {middle_dot} "]
+        footer_children: list[Any] = [f"{copyright_mark} {CURRENT_YEAR} {DEVELOPER_NAME_SHORT} {middle_dot} "]
         for idx, link in enumerate(links):
             footer_children.append(link)
             if idx < len(links) - 1:
@@ -204,7 +207,7 @@ def inner_page_footer(*, inline: bool = False, include_book: bool = True) -> Foo
     return Footer(
         Container(
             Div(
-                Span(f"{copyright_mark} 2025 {DEVELOPER_NAME_SHORT}.", cls="footer-copy"),
+                Span(f"{copyright_mark} {CURRENT_YEAR} {DEVELOPER_NAME_SHORT}.", cls="footer-copy"),
                 Div(
                     *links,
                     cls="footer-links",
@@ -221,7 +224,7 @@ def footer() -> Footer:
     return Footer(
         Container(
             Div(
-                P(f"{copyright_mark} 2025 {DEVELOPER_NAME_SHORT}. Built with FastHTML + Faststrap.", cls="footer-copy"),
+                P(f"{copyright_mark} {CURRENT_YEAR} {DEVELOPER_NAME_SHORT}. Built with FastHTML + Faststrap.", cls="footer-copy"),
                 Div(
                     A("Blog", href="/blog", cls="footer-link"),
                     A("CV", href="/cv", cls="footer-link"),

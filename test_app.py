@@ -285,3 +285,100 @@ def test_vercel_deploy_excludes_local_env_and_validates_runtime_env() -> None:
     assert 'if not os.getenv("VERCEL")' in config
     assert "NEOPORTFOLIO_SECRET_KEY must be set" in config
     assert "SUPABASE_SERVICE_ROLE_KEY must be set" in config
+
+
+# ── Rate limiting tests ───────────────────────────────────────────────────────
+
+def test_contact_rate_limit_blocks_after_many_submissions() -> None:
+    """After many submissions from the same IP, further submissions should be rate-limited."""
+    # Make enough submissions to hit the rate limit (5 per 15 min window)
+    # Note: previous tests may have used some slots, so we make enough to exceed the limit
+    rate_limited = False
+    for i in range(10):
+        response = client.post(
+            "/contact",
+            data={
+                "name": f"User {i}",
+                "email": f"user{i}@example.com",
+                "message": f"Test message {i}",
+            },
+        )
+        assert response.status_code == 200
+        if "Too many requests" in response.text:
+            rate_limited = True
+            break
+    assert rate_limited, "Rate limiting should have triggered within 10 submissions"
+
+
+def test_booking_rate_limit_blocks_after_many_submissions() -> None:
+    """After 5 booking submissions, the 6th should be rate-limited."""
+    for i in range(5):
+        response = client.post(
+            "/book/submit",
+            data={
+                "name": f"Client {i}",
+                "email": f"client{i}@example.com",
+                "message": f"Project brief {i}",
+            },
+        )
+        assert response.status_code == 200
+
+    # 6th should be rate-limited
+    response = client.post(
+        "/book/submit",
+        data={
+            "name": "Rate Limited Client",
+            "email": "limited@example.com",
+            "message": "This should be blocked",
+        },
+    )
+    assert response.status_code == 200
+    assert "Too many requests" in response.text
+
+
+# ── 404 and error handling tests ─────────────────────────────────────────────
+
+def test_unknown_route_returns_404() -> None:
+    """Unknown routes should return a 404 status."""
+    response = client.get("/nonexistent-page")
+    assert response.status_code == 404
+
+
+def test_health_endpoint_returns_json() -> None:
+    """Health endpoint should return JSON with status."""
+    response = client.get("/health")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "healthy"
+    assert data["app"] == "neoportfolio"
+
+
+# ── Accessibility tests ──────────────────────────────────────────────────────
+
+def test_home_page_has_skip_link() -> None:
+    """Home page should have a skip-to-content link for keyboard users."""
+    response = client.get("/")
+    html = response.text
+    assert 'class="skip-link"' in html
+    assert 'href="#main-content"' in html
+
+
+def test_home_page_has_main_content_id() -> None:
+    """Home page Main element should have id='main-content' for skip link."""
+    response = client.get("/")
+    html = response.text
+    assert 'id="main-content"' in html
+
+
+# ── Copyright year test ──────────────────────────────────────────────────────
+
+def test_footer_shows_current_year() -> None:
+    """Footer should display the current year, not a hardcoded year."""
+    from datetime import datetime
+    current_year = str(datetime.now().year)
+    response = client.get("/")
+    html = response.text
+    assert current_year in html
+    # Should NOT have hardcoded 2025 (unless it happens to be 2025)
+    if current_year != "2025":
+        assert "© 2025" not in html

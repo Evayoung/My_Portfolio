@@ -8,7 +8,7 @@
 .blog-card { background:var(--bg-elevated); border:1px solid rgba(74,208,255,0.12); border-radius:1rem; padding:1.4rem; transition:border-color 0.2s,transform 0.2s,box-shadow 0.2s; height:100%; }
 .blog-card:hover { border-color:rgba(74,208,255,0.4); transform:translateY(-3px); box-shadow:0 16px 36px rgba(0,0,0,0.22); }
 .blog-card-featured { border-color:rgba(74,208,255,0.3); background:linear-gradient(135deg,var(--bg-elevated),rgba(70,200,238,0.04)); }
-.blog-category-chip { display:inline-flex; align-items:center; padding:0.22rem 0.7rem; border-radius:999px; font-size:0.72rem; font-weight:700; letter-spacing:0.06em; }
+.blog-category-chip { display:inline-flex; align-items:center; padding:0.22rem 0.7rem; border-radius:999px; font-size:0.72rem; font-weight:700; letter-spacing:0.06em; background:color-mix(in srgb, var(--chip-color, #19C6F7) 12%, transparent); color:var(--chip-color, #19C6F7); border:1px solid color-mix(in srgb, var(--chip-color, #19C6F7) 30%, transparent); }
 .blog-read-time { color:var(--text-dim); font-size:0.8rem; display:flex; align-items:center; gap:0.2rem; }
 .blog-card-title { margin:0 0 0.85rem; font-size:1.05rem; font-weight:700; line-height:1.35; }
 .blog-card-excerpt { color:var(--text-soft); font-size:0.91rem; line-height:1.65; margin:0; }

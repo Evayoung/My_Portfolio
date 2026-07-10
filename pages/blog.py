@@ -58,8 +58,7 @@ def blog_card(post: BlogPost, featured: bool = False) -> Col:
                     Span(
                         post.category.replace("-", " ").upper(),
                         cls="blog-category-chip",
-                        style=f"background:rgba({','.join(str(int(color.lstrip('#')[i:i+2], 16)) for i in (0,2,4))},0.12);"
-                              f"color:{color};border:1px solid {color}30;",
+                        style=f"--chip-color:{color};",
                     ),
                     Span(
                         Icon("clock", cls="me-1"),

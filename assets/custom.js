@@ -1,5 +1,7 @@
 const roleTitles = ["Full-Stack Developer", "AI Systems Architect", "Backend API Engineer", "Open-Source Builder"];
 
+let _revealObserver = null;
+
 function initLoader() {
   const loader = document.getElementById("page-loader");
   if (!loader) return;
@@ -26,7 +28,17 @@ function initScrollNav() {
   const sync = () => nav.classList.toggle("is-visible", window.scrollY > 20 || window.innerWidth < 992);
   // Small delay on first load to allow the slide-in animation to play
   window.setTimeout(sync, 80);
-  window.addEventListener("scroll", sync, { passive: true });
+  // Throttled scroll handler using requestAnimationFrame
+  let ticking = false;
+  window.addEventListener("scroll", () => {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        sync();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
   window.addEventListener("resize", sync);
 }
 
@@ -46,14 +58,18 @@ function initHtmxReveal() {
 }
 
 function initReveal() {
+  // Disconnect previous observer to prevent memory leaks
+  if (_revealObserver) {
+    _revealObserver.disconnect();
+  }
   const nodes = document.querySelectorAll(".reveal-block");
   if (!nodes.length) return;
-  const observer = new IntersectionObserver((entries) => {
+  _revealObserver = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) entry.target.classList.add("is-visible");
     });
   }, { threshold: 0.15 });
-  nodes.forEach((node) => observer.observe(node));
+  nodes.forEach((node) => _revealObserver.observe(node));
 }
 
 function initHeroMotion() {

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import time as _time
 from pathlib import Path
 from typing import Any
 from urllib.parse import quote_plus
@@ -47,6 +48,45 @@ except ImportError:
     from services.submission_service import submit_booking_request, submit_contact_inquiry
 
 DOWNLOAD_COUNTS = {"pdf": 0, "web": 0, "print": 0}
+
+# ── Rate limiting for form submissions ────────────────────────────────────────
+_FORM_SUBMISSIONS: dict[str, list[float]] = {}
+_FORM_RATE_LIMIT = 5       # max submissions per window
+_FORM_RATE_WINDOW = 900    # 15 minutes
+
+
+def _check_rate_limit(ip: str) -> bool:
+    """Return True if submission is allowed, False if rate-limited."""
+    now = _time.time()
+    attempts = _FORM_SUBMISSIONS.get(ip, [])
+    attempts = [t for t in attempts if now - t < _FORM_RATE_WINDOW]
+    if len(attempts) >= _FORM_RATE_LIMIT:
+        return False
+    attempts.append(now)
+    _FORM_SUBMISSIONS[ip] = attempts
+    return True
+
+
+def _get_client_ip(req) -> str:
+    """Extract client IP from request headers."""
+    return req.headers.get("x-forwarded-for", req.headers.get("x-real-ip", "127.0.0.1")).split(",")[0].strip()
+
+
+def _cleanup_old_pdfs(tmp_dir: Path) -> None:
+    """Delete PDFs older than 10 minutes from the output directory.
+
+    On Vercel serverless, /tmp accumulates across requests.
+    """
+    import os as _os
+    if not _os.getenv("VERCEL"):
+        return  # Local dev: keep generated PDFs for debugging
+    now = _time.time()
+    try:
+        for f in tmp_dir.glob("*.pdf"):
+            if now - f.stat().st_mtime > 600:  # 10 minutes
+                f.unlink(missing_ok=True)
+    except OSError:
+        pass  # Best-effort cleanup
 
 
 def _service_map() -> dict[str, Any]:
@@ -182,6 +222,7 @@ def setup_routes(app: Any, asset_dir: Path) -> None:
 
     @app.post("/contact")
     def contact(
+        req,
         name: str = "",
         email: str = "",
         subject: str = "",
@@ -199,6 +240,14 @@ def setup_routes(app: Any, asset_dir: Path) -> None:
                 "Please fill in your name, email, and project brief before sending.",
                 tone="warning",
             )
+        # Rate limiting
+        client_ip = _get_client_ip(req)
+        if not _check_rate_limit(client_ip):
+            return form_status_fragment(
+                "Too many requests",
+                "You have sent too many messages recently. Please wait a few minutes before trying again.",
+                tone="warning",
+            )
         result = submit_contact_inquiry(name=name, email=email, subject=subject, message=message)
         if result.stored:
             return form_status_fragment(result.title, result.message, tone=result.tone)
@@ -213,6 +262,7 @@ def setup_routes(app: Any, asset_dir: Path) -> None:
 
     @app.post("/book/submit")
     def booking_submit(
+        req,
         name: str = "",
         email: str = "",
         whatsapp: str = "",
@@ -231,6 +281,14 @@ def setup_routes(app: Any, asset_dir: Path) -> None:
             return form_status_fragment(
                 "Project brief incomplete",
                 "Please share your name, email, and project description before continuing.",
+                tone="warning",
+            )
+        # Rate limiting
+        client_ip = _get_client_ip(req)
+        if not _check_rate_limit(client_ip):
+            return form_status_fragment(
+                "Too many requests",
+                "You have sent too many briefs recently. Please wait a few minutes before trying again.",
                 tone="warning",
             )
         result = submit_booking_request(
@@ -274,6 +332,7 @@ def setup_routes(app: Any, asset_dir: Path) -> None:
             from pathlib import Path as _Path
             tmp_dir = _Path("/tmp") if _os.getenv("VERCEL") else (asset_dir / "generated")
             tmp_dir.mkdir(parents=True, exist_ok=True)
+            _cleanup_old_pdfs(tmp_dir)
             pdf_path = tmp_dir / "neoportfolio_resume.pdf"
             try:
                 try:

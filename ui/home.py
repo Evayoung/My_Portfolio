@@ -601,6 +601,7 @@ def page_shell(active_filter: str, downloads: dict[str, int]) -> tuple[Any, ...]
             twitter_creator="@evayoung",
         ),
         structured,
+        A("Skip to content", href="#main-content", cls="skip-link"),
         site_nav(),
         Main(
             hero_section(),
@@ -611,6 +612,7 @@ def page_shell(active_filter: str, downloads: dict[str, int]) -> tuple[Any, ...]
             cv_zone_section(downloads),
             contact_section(),
             footer(),
+            id="main-content",
             cls="neo-app",
         ),
         service_modal(),
