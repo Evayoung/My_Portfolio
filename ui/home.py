@@ -17,7 +17,6 @@ from faststrap import (
     Icon,
     PageMeta,
     PricingGroup,
-    Progress,
     Row,
     SEO,
     Testimonial,
@@ -37,7 +36,6 @@ try:
         DEVELOPER_NAME_SHORT,
         DEVELOPER_ROLE,
         EMAIL,
-        EXPERIENCE,
         GITHUB_URL,
         HERO_SUMMARY,
         JOURNEY_PARAGRAPHS,
@@ -50,10 +48,9 @@ try:
         SEO_TITLE,
         SITE_URL,
         SOCIAL_LINKS,
-        TECHNICAL_SKILLS,
         WHATSAPP,
     )
-    from ..services.content_service import list_pricing_tiers, list_services, list_testimonials
+    from ..services.content_service import list_core_skills, list_pricing_tiers, list_services, list_testimonials, list_work_history
     from ..services.github_service import get_about_stats
     from .modals import case_study_modal, cv_preview_modal, project_preview_modal, service_modal
     from .portfolio import portfolio_controls
@@ -71,7 +68,6 @@ except ImportError:
         DEVELOPER_NAME_SHORT,
         DEVELOPER_ROLE,
         EMAIL,
-        EXPERIENCE,
         GITHUB_URL,
         HERO_SUMMARY,
         JOURNEY_PARAGRAPHS,
@@ -84,36 +80,28 @@ except ImportError:
         SEO_TITLE,
         SITE_URL,
         SOCIAL_LINKS,
-        TECHNICAL_SKILLS,
         WHATSAPP,
     )
-    from services.content_service import list_pricing_tiers, list_services, list_testimonials
+    from services.content_service import list_core_skills, list_pricing_tiers, list_services, list_testimonials, list_work_history
     from services.github_service import get_about_stats
     from ui.modals import case_study_modal, cv_preview_modal, project_preview_modal, service_modal
     from ui.portfolio import portfolio_controls
     from ui.shared import floating_textarea_field, footer, loading_fragment_button, section_header, site_nav, social_icon
 
 
-def _skill_row(skill: Any) -> Div:
-    return Div(
-        Div(
-            Span(skill.name, cls="skill-name"),
-            Span(skill.badge, cls="skill-badge"),
-            cls="skill-row-top",
-        ),
-        Progress(skill.score, cls="skill-progress-track", height="0.6rem"),
-        cls="skill-row reveal-block",
-    )
+def _skill_row(skill: str) -> Div:
+    return Div(skill, cls="home-core-skill reveal-block")
 
 
 def _experience_item(item: Any) -> Div:
+    summary = item.bullets[0] if item.bullets else item.location
     return Div(
         Span(cls="timeline-dot"),
         Div(
-            Span(item.year, cls="timeline-year-pill"),
+            Span(item.period, cls="timeline-year-pill"),
             H4(item.title, cls="timeline-role"),
-            P(item.company, cls="timeline-company"),
-            P(item.summary, cls="timeline-summary"),
+            P(item.organisation, cls="timeline-company"),
+            P(summary, cls="timeline-summary"),
             cls="timeline-content",
         ),
         cls="timeline-entry reveal-block",
@@ -220,6 +208,8 @@ def hero_section() -> Section:
 
 def about_section() -> Section:
     about_stats = get_about_stats()
+    experience_items = list_work_history()[:3]
+    core_skills = list_core_skills()[:8]
     return Section(
         Container(
             section_header("About Me", ABOUT_SUMMARY),
@@ -243,7 +233,7 @@ def about_section() -> Section:
                             Div(
                                 NotStr('<svg viewBox="0 0 400 120" class="timeline-svg"><path d="M14 90 C80 16, 168 12, 236 64 S334 118, 392 40"></path></svg>'),
                             ),
-                            Div(*[_experience_item(item) for item in EXPERIENCE], cls="timeline-list"),
+                            Div(*[_experience_item(item) for item in experience_items], cls="timeline-list"),
                             cls="experience-block",
                         ),
                         cls="about-left-column",
@@ -253,8 +243,8 @@ def about_section() -> Section:
                 Col(
                     Div(
                         Card(
-                            H3("Technical Skills", cls="panel-title"),
-                            Div(*[_skill_row(skill) for skill in TECHNICAL_SKILLS], cls="skills-list"),
+                            H3("Core Skills", cls="panel-title"),
+                            Div(*[_skill_row(skill) for skill in core_skills], cls="home-core-skills-list"),
                             cls="about-panel skills-panel reveal-block",
                         ),
                         Row(*[_stat_card(stat) for stat in about_stats], cls="g-3 about-stats-row"),

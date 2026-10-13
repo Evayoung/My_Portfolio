@@ -146,21 +146,6 @@ JOURNEY_PARAGRAPHS = (
 
 
 @dataclass(frozen=True)
-class TechnicalSkill:
-    name: str
-    score: int
-    badge: str
-
-
-@dataclass(frozen=True)
-class ExperienceItem:
-    year: str
-    title: str
-    company: str
-    summary: str
-
-
-@dataclass(frozen=True)
 class StatItem:
     value: str
     label: str
@@ -207,38 +192,6 @@ class Testimonial:
     role: str
     company: str
 
-
-TECHNICAL_SKILLS = (
-    TechnicalSkill("Python / FastAPI", 97, "Backend"),
-    TechnicalSkill("FastHTML / Faststrap", 95, "Full-Stack"),
-    TechnicalSkill("AI & LLM Integration", 92, "AI/ML"),
-    TechnicalSkill("PostgreSQL / SQLite", 90, "Database"),
-    TechnicalSkill("Reflex (Full-Stack)", 88, "Full-Stack"),
-    TechnicalSkill("PySide6 / PyQt6", 87, "Desktop"),
-    TechnicalSkill("KivyMD (Mobile)", 85, "Mobile"),
-    TechnicalSkill("Linux / systemd", 78, "DevOps"),
-)
-
-EXPERIENCE = (
-    ExperienceItem(
-        "2024 - Present",
-        "Full-Stack & AI Systems Architect",
-        "Independent / Freelance",
-        "Designing and shipping production-grade systems across AI automation, security workflows, data infrastructure, and Python-native full-stack products.",
-    ),
-    ExperienceItem(
-        "2023 - Present",
-        "Python & Software Tutor",
-        "SuperProf & Certmart",
-        "Teaching Python, software architecture, and AI literacy through practical delivery-focused learning plans.",
-    ),
-    ExperienceItem(
-        "2024 - 2025",
-        "Backend Lead",
-        "University of Ilorin - Clinic & CBT Projects",
-        "Delivered institution-scale systems including a digital clinic platform and biometric exam access controls.",
-    ),
-)
 
 ABOUT_STATS = (
     StatItem("10+", "Production Projects"),
@@ -561,7 +514,7 @@ def _load_live_home_content() -> dict:
     try:
         rows = _rest_request(
             "site_home_content",
-            "?select=hero_roles,hero_summary,about_summary,journey_paragraphs,about_stats,experience_items,technical_skills,cv_highlights,seo_keywords,profile_image_url,hero_background_url,booking_background_url,cv_background_url&id=eq.primary&limit=1",
+            "?select=hero_roles,hero_summary,about_summary,journey_paragraphs,about_stats,cv_highlights,seo_keywords,profile_image_url,hero_background_url,booking_background_url,cv_background_url&id=eq.primary&limit=1",
         )
         return rows[0] if isinstance(rows, list) and rows else {}
     except Exception:
@@ -593,16 +546,6 @@ if _LIVE_HOME_CONTENT:
     JOURNEY_PARAGRAPHS = tuple(_LIVE_HOME_CONTENT.get("journey_paragraphs") or JOURNEY_PARAGRAPHS) or JOURNEY_PARAGRAPHS
     _stats = _LIVE_HOME_CONTENT.get("about_stats") or []
     ABOUT_STATS = tuple(StatItem(str(item.get("value", "")), str(item.get("label", ""))) for item in _stats if isinstance(item, dict))
-    _experience = _LIVE_HOME_CONTENT.get("experience_items") or []
-    EXPERIENCE = tuple(
-        ExperienceItem(str(item.get("year", "")), str(item.get("title", "")), str(item.get("company", "")), str(item.get("summary", "")))
-        for item in _experience if isinstance(item, dict)
-    )
-    _skills = _LIVE_HOME_CONTENT.get("technical_skills") or []
-    TECHNICAL_SKILLS = tuple(
-        TechnicalSkill(str(item.get("name", "")), max(0, min(100, int(item.get("score", 0)))), str(item.get("badge", "")))
-        for item in _skills if isinstance(item, dict)
-    )
     _highlights = _LIVE_HOME_CONTENT.get("cv_highlights") or []
     CV_HIGHLIGHTS = tuple((str(item.get("title", "")), str(item.get("copy", ""))) for item in _highlights if isinstance(item, dict))
     _keywords = _LIVE_HOME_CONTENT.get("seo_keywords") or []
