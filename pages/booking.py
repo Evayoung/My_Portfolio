@@ -13,13 +13,13 @@ from faststrap import Card, Col, Container, FloatingLabel, Icon, Row, SEO
 try:
     from ..content import (
         DEVELOPER_NAME_SHORT, DEVELOPER_ROLE, EMAIL,
-        LOCATION, SITE_URL, WHATSAPP,
+        BOOKING_BACKGROUND_URL, LOCATION, SITE_URL, WHATSAPP, css_url,
     )
     from ..services.content_service import list_services
 except ImportError:
     from content import (
         DEVELOPER_NAME_SHORT, DEVELOPER_ROLE, EMAIL,
-        LOCATION, SITE_URL, WHATSAPP,
+        BOOKING_BACKGROUND_URL, LOCATION, SITE_URL, WHATSAPP, css_url,
     )
     from services.content_service import list_services
 try:
@@ -91,6 +91,7 @@ def booking_page() -> tuple[Any, ...]:
                     ),
                 ),
                 cls="book-header-section",
+                style=f"--booking-background-image: url({css_url(BOOKING_BACKGROUND_URL)});",
             ),
 
             # ── Quick connect strip ─────────────────────────────────────────────

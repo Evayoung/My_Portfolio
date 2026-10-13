@@ -73,13 +73,25 @@ def _safe_load(loader, fallback):
         return fallback
     try:
         loaded = loader()
-        return loaded if loaded else fallback
+        # An empty live table is an intentional editorial state. Falling back
+        # to stale bundled content would make deleted/hidden records reappear.
+        return fallback if loaded is None else loaded
     except (HTTPError, URLError, TimeoutError, OSError, ValueError, KeyError, TypeError):
         return fallback
 
 
 def get_portfolio_filters() -> tuple[tuple[str, str], ...]:
-    return PORTFOLIO_FILTERS
+    categories = {project.category for project in list_projects() if project.category}
+    if not categories:
+        return (("all", "All"),)
+    labels = {slug: label for slug, label in PORTFOLIO_FILTERS}
+    ordered = [(slug, labels[slug]) for slug, _ in PORTFOLIO_FILTERS[1:] if slug in categories]
+    ordered.extend(
+        (slug, slug.replace("-", " ").title())
+        for slug in sorted(categories)
+        if slug not in labels
+    )
+    return (("all", "All"), *ordered)
 
 
 def _project_from_row(row: dict[str, Any]) -> Project:
@@ -227,7 +239,17 @@ def list_testimonials() -> tuple[Testimonial, ...]:
 
 
 def list_blog_categories() -> tuple[tuple[str, str], ...]:
-    return BLOG_CATEGORIES
+    categories = {post.category for post in list_blog_posts() if post.category}
+    if not categories:
+        return (("all", "All"),)
+    labels = {slug: label for slug, label in BLOG_CATEGORIES}
+    ordered = [(slug, labels[slug]) for slug, _ in BLOG_CATEGORIES[1:] if slug in categories]
+    ordered.extend(
+        (slug, slug.replace("-", " ").title())
+        for slug in sorted(categories)
+        if slug not in labels
+    )
+    return (("all", "All"), *ordered)
 
 
 def _post_from_row(row: dict[str, Any]) -> BlogPost:

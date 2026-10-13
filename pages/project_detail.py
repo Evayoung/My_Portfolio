@@ -8,10 +8,10 @@ from fasthtml.common import *
 from faststrap import Col, Container, EmptyState, Icon, Row, SEO
 
 try:
-    from ..content import DEVELOPER_NAME_SHORT, SITE_URL
+    from ..content import BOOKING_BACKGROUND_URL, DEVELOPER_NAME_SHORT, SITE_URL, css_url
     from ..ui.shared import inner_page_footer, shared_inner_nav
 except ImportError:
-    from content import DEVELOPER_NAME_SHORT, SITE_URL
+    from content import BOOKING_BACKGROUND_URL, DEVELOPER_NAME_SHORT, SITE_URL, css_url
     from ui.shared import inner_page_footer, shared_inner_nav
 
 
@@ -61,6 +61,7 @@ def project_detail_page(project: Any | None) -> Any:
                     ),
                 ),
                 cls="book-header-section",
+                style=f"--booking-background-image: url({css_url(BOOKING_BACKGROUND_URL)});",
             ),
             Section(
                 Container(

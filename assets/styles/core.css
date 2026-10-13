@@ -142,7 +142,7 @@ a {
 .hero-background {
   background:
     linear-gradient(rgba(10, 15, 24, 0.22), rgba(10, 15, 24, 0.48)),
-    url("/assets/images/hero-bg4.jpg") center center / cover no-repeat;
+    var(--hero-background-image, url("/assets/images/hero-bg4.jpg")) center center / cover no-repeat;
   transform: scale(1.04);
 }
 

@@ -28,7 +28,6 @@ class Settings:
     port: int = int(os.getenv("PORT", "5062"))
     supabase_url: str = os.getenv("SUPABASE_URL", "")
     supabase_anon_key: str = os.getenv("SUPABASE_ANON_KEY", "")
-    supabase_service_role_key: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
     github_username: str = os.getenv("GITHUB_USERNAME", "Evayoung")
     github_access_token: str = os.getenv("GITHUB_ACCESS_TOKEN", "")
 
@@ -57,8 +56,6 @@ def _validate_production_settings() -> None:
         raise RuntimeError("SUPABASE_URL must be set in production.")
     if settings.supabase_anon_key in {"", "your-public-anon-key"}:
         raise RuntimeError("SUPABASE_ANON_KEY must be set in production.")
-    if settings.supabase_service_role_key in {"", "your-service-role-key"}:
-        raise RuntimeError("SUPABASE_SERVICE_ROLE_KEY must be set in production.")
 
 
 _validate_production_settings()

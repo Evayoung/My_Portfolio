@@ -276,7 +276,7 @@ def test_public_env_template_exists() -> None:
     assert (root / ".env.example").exists()
 
 
-def test_vercel_deploy_excludes_local_env_and_validates_runtime_env() -> None:
+def test_vercel_deploy_excludes_local_env_and_uses_public_supabase_key() -> None:
     root = Path(__file__).parent
     vercelignore = (root / ".vercelignore").read_text()
     config = (root / "config.py").read_text()
@@ -284,7 +284,8 @@ def test_vercel_deploy_excludes_local_env_and_validates_runtime_env() -> None:
     assert ".env" in vercelignore
     assert 'if not os.getenv("VERCEL")' in config
     assert "NEOPORTFOLIO_SECRET_KEY must be set" in config
-    assert "SUPABASE_SERVICE_ROLE_KEY must be set" in config
+    assert "SUPABASE_ANON_KEY must be set" in config
+    assert "SUPABASE_SERVICE_ROLE_KEY" not in config
 
 
 # ── Rate limiting tests ───────────────────────────────────────────────────────

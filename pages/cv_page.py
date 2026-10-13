@@ -14,8 +14,8 @@ import json
 
 try:
     from ..content import (
-        DEVELOPER_NAME, DEVELOPER_NAME_SHORT, DEVELOPER_ROLE, EMAIL,
-        GITHUB_URL, LINKEDIN_URL, PHONE, SITE_URL, WHATSAPP, LOCATION,
+        CV_BACKGROUND_URL, DEVELOPER_NAME, DEVELOPER_NAME_SHORT, DEVELOPER_ROLE, EMAIL,
+        GITHUB_URL, LINKEDIN_URL, PHONE, SITE_URL, WHATSAPP, LOCATION, css_url,
     )
     from ..services.content_service import (
         get_cv_meta,
@@ -29,8 +29,8 @@ try:
     )
 except ImportError:
     from content import (
-        DEVELOPER_NAME, DEVELOPER_NAME_SHORT, DEVELOPER_ROLE, EMAIL,
-        GITHUB_URL, LINKEDIN_URL, PHONE, SITE_URL, WHATSAPP, LOCATION,
+        CV_BACKGROUND_URL, DEVELOPER_NAME, DEVELOPER_NAME_SHORT, DEVELOPER_ROLE, EMAIL,
+        GITHUB_URL, LINKEDIN_URL, PHONE, SITE_URL, WHATSAPP, LOCATION, css_url,
     )
     from services.content_service import (
         get_cv_meta,
@@ -179,6 +179,7 @@ def cv_page() -> tuple[Any, ...]:
                     ),
                 ),
                 cls="cv-header-section",
+                style=f"--cv-background-image: url({css_url(CV_BACKGROUND_URL)});",
             ),
 
             # ── Body ────────────────────────────────────────────────────────────

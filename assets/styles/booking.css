@@ -1,5 +1,5 @@
 /* ═══ BOOKING ════════════════════════════════════════════════════════════════ */
-.book-header-section { position:relative; padding:7rem 0 3.5rem; background:linear-gradient(180deg,rgba(7,17,31,0.65) 0%,rgba(7,17,31,0.95) 100%),url("/assets/images/hero-bg2.jpg") center/cover no-repeat; }
+.book-header-section { position:relative; padding:7rem 0 3.5rem; background:linear-gradient(180deg,rgba(7,17,31,0.65) 0%,rgba(7,17,31,0.95) 100%),var(--booking-background-image,url("/assets/images/hero-bg2.jpg")) center/cover no-repeat; }
 .book-header-section .container { position:relative; z-index:1; }
 .book-header-title { font-size:clamp(2.2rem,5vw,3.6rem); font-weight:700; margin:0.4rem 0 0.5rem; }
 .book-header-sub { color:var(--text-soft); font-size:1.05rem; max-width:46ch; margin:0 auto; }

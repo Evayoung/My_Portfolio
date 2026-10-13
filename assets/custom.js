@@ -1,5 +1,3 @@
-const roleTitles = ["Full-Stack Developer", "AI Systems Architect", "Backend API Engineer", "Open-Source Builder"];
-
 let _revealObserver = null;
 
 function initLoader() {
@@ -11,6 +9,13 @@ function initLoader() {
 function initRoleMorph() {
   const node = document.getElementById("hero-role");
   if (!node) return;
+  let roleTitles = [];
+  try {
+    roleTitles = JSON.parse(node.dataset.roleTitles || "[]");
+  } catch {
+    roleTitles = [];
+  }
+  if (!Array.isArray(roleTitles) || roleTitles.length < 2) return;
   let index = 0;
   window.setInterval(() => {
     index = (index + 1) % roleTitles.length;

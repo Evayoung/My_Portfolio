@@ -1,5 +1,5 @@
 /* ═══ CV PAGE ═══════════════════════════════════════════════════════════════ */
-.cv-header-section { position:relative; padding:7rem 0 4rem; background:linear-gradient(180deg,rgba(7,17,31,0.7) 0%,rgba(7,17,31,0.95) 100%),url("/assets/images/hero-bg4.jpg") center/cover no-repeat; }
+.cv-header-section { position:relative; padding:7rem 0 4rem; background:linear-gradient(180deg,rgba(7,17,31,0.7) 0%,rgba(7,17,31,0.95) 100%),var(--cv-background-image,url("/assets/images/hero-bg4.jpg")) center/cover no-repeat; }
 .cv-header-section .container { position:relative; z-index:1; }
 .cv-header-name { font-size:clamp(2.4rem,5vw,3.8rem); font-weight:700; margin:0 0 0.35rem; }
 .cv-header-role { color:var(--cyan); font-size:1.15rem; font-weight:600; margin:0; }

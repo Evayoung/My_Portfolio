@@ -7,6 +7,7 @@ import importlib.util
 import json
 from pathlib import Path
 import sys
+from urllib.parse import quote
 from urllib.request import Request, urlopen
 
 try:
@@ -31,19 +32,26 @@ LOCATION = "Ilorin, Kwara State, Nigeria"
 GITHUB_URL = "https://github.com/Evayoung"
 LINKEDIN_URL = "https://linkedin.com/in/michealolorundare"
 SITE_URL = "https://olorundaremicheal.vercel.app"
+PROFILE_IMAGE_URL = "/assets/images/me-photo.jpg"
+HERO_BACKGROUND_URL = "/assets/images/hero-bg4.jpg"
+BOOKING_BACKGROUND_URL = "/assets/images/hero-bg2.jpg"
+CV_BACKGROUND_URL = "/assets/images/hero-bg4.jpg"
+SEO_TITLE = ""
+SEO_DESCRIPTION = ""
 
 
-def _best_read_key() -> str:
-    return settings.supabase_service_role_key or settings.supabase_anon_key
+def _public_read_key() -> str:
+    """Public rendering uses only the publishable anon key."""
+    return settings.supabase_anon_key
 
 
 def _supabase_is_configured() -> bool:
-    return bool(settings.supabase_url and _best_read_key())
+    return bool(settings.supabase_url and _public_read_key())
 
 
 def _rest_request(path: str, query: str = "") -> object:
     url = f"{settings.supabase_url.rstrip('/')}/rest/v1/{path}{query}"
-    key = _best_read_key()
+    key = _public_read_key()
     request = Request(
         url,
         headers={
@@ -86,6 +94,8 @@ def _load_live_identity() -> dict[str, str]:
             "github_url": cv_row.get("github_url") or site_row.get("github_url") or GITHUB_URL,
             "linkedin_url": cv_row.get("linkedin_url") or site_row.get("linkedin_url") or LINKEDIN_URL,
             "site_url": site_row.get("site_url") or SITE_URL,
+            "seo_title": site_row.get("seo_title") or "",
+            "seo_description": site_row.get("seo_description") or "",
         }
     except Exception:
         return {}
@@ -103,6 +113,8 @@ LOCATION = _LIVE_IDENTITY.get("location", LOCATION)
 GITHUB_URL = _LIVE_IDENTITY.get("github_url", GITHUB_URL)
 LINKEDIN_URL = _LIVE_IDENTITY.get("linkedin_url", LINKEDIN_URL)
 SITE_URL = _LIVE_IDENTITY.get("site_url", SITE_URL)
+SEO_TITLE = _LIVE_IDENTITY.get("seo_title", SEO_TITLE)
+SEO_DESCRIPTION = _LIVE_IDENTITY.get("seo_description", SEO_DESCRIPTION)
 
 ROLE_TITLES = (
     "Full-Stack Developer",
@@ -532,6 +544,30 @@ SOCIAL_LINKS = (
     ("envelope", f"mailto:{EMAIL}", "Email", "#f8c73a"),
 )
 
+
+def css_url(value: str) -> str:
+    """Return a quoted CSS URL for a same-site asset or HTTPS media URL."""
+    value = (value or "").strip()
+    if value.startswith("/assets/"):
+        return json.dumps(quote(value, safe="/:?&=%-._~"))
+    if value.startswith("https://") and not any(char.isspace() for char in value):
+        return json.dumps(quote(value, safe=":/?&=%-._~"))
+    return json.dumps("/assets/images/hero-bg4.jpg")
+
+
+def _load_live_home_content() -> dict:
+    if not _supabase_is_configured():
+        return {}
+    try:
+        rows = _rest_request(
+            "site_home_content",
+            "?select=hero_roles,hero_summary,about_summary,journey_paragraphs,about_stats,experience_items,technical_skills,cv_highlights,seo_keywords,profile_image_url,hero_background_url,booking_background_url,cv_background_url&id=eq.primary&limit=1",
+        )
+        return rows[0] if isinstance(rows, list) and rows else {}
+    except Exception:
+        return {}
+
+
 KEYWORDS_GLOBAL = [
     "Olorundare Micheal",
     "Full-Stack Developer",
@@ -547,3 +583,31 @@ KEYWORDS_GLOBAL = [
     "KivyMD",
     "Reflex",
 ]
+
+_LIVE_HOME_CONTENT = _load_live_home_content()
+
+if _LIVE_HOME_CONTENT:
+    ROLE_TITLES = tuple(_LIVE_HOME_CONTENT.get("hero_roles") or ROLE_TITLES) or ROLE_TITLES
+    HERO_SUMMARY = _LIVE_HOME_CONTENT.get("hero_summary") or HERO_SUMMARY
+    ABOUT_SUMMARY = _LIVE_HOME_CONTENT.get("about_summary") or ABOUT_SUMMARY
+    JOURNEY_PARAGRAPHS = tuple(_LIVE_HOME_CONTENT.get("journey_paragraphs") or JOURNEY_PARAGRAPHS) or JOURNEY_PARAGRAPHS
+    _stats = _LIVE_HOME_CONTENT.get("about_stats") or []
+    ABOUT_STATS = tuple(StatItem(str(item.get("value", "")), str(item.get("label", ""))) for item in _stats if isinstance(item, dict))
+    _experience = _LIVE_HOME_CONTENT.get("experience_items") or []
+    EXPERIENCE = tuple(
+        ExperienceItem(str(item.get("year", "")), str(item.get("title", "")), str(item.get("company", "")), str(item.get("summary", "")))
+        for item in _experience if isinstance(item, dict)
+    )
+    _skills = _LIVE_HOME_CONTENT.get("technical_skills") or []
+    TECHNICAL_SKILLS = tuple(
+        TechnicalSkill(str(item.get("name", "")), max(0, min(100, int(item.get("score", 0)))), str(item.get("badge", "")))
+        for item in _skills if isinstance(item, dict)
+    )
+    _highlights = _LIVE_HOME_CONTENT.get("cv_highlights") or []
+    CV_HIGHLIGHTS = tuple((str(item.get("title", "")), str(item.get("copy", ""))) for item in _highlights if isinstance(item, dict))
+    _keywords = _LIVE_HOME_CONTENT.get("seo_keywords") or []
+    KEYWORDS_GLOBAL = tuple(str(value) for value in _keywords if str(value).strip())
+    PROFILE_IMAGE_URL = _LIVE_HOME_CONTENT.get("profile_image_url") or PROFILE_IMAGE_URL
+    HERO_BACKGROUND_URL = _LIVE_HOME_CONTENT.get("hero_background_url") or HERO_BACKGROUND_URL
+    BOOKING_BACKGROUND_URL = _LIVE_HOME_CONTENT.get("booking_background_url") or BOOKING_BACKGROUND_URL
+    CV_BACKGROUND_URL = _LIVE_HOME_CONTENT.get("cv_background_url") or CV_BACKGROUND_URL

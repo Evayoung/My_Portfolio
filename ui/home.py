@@ -30,6 +30,9 @@ try:
         ABOUT_SUMMARY,
         CODE_SAMPLE,
         CV_HIGHLIGHTS,
+        HERO_BACKGROUND_URL,
+        PROFILE_IMAGE_URL,
+        css_url,
         DEVELOPER_NAME,
         DEVELOPER_NAME_SHORT,
         DEVELOPER_ROLE,
@@ -43,6 +46,8 @@ try:
         LOCATION,
         PHONE,
         ROLE_TITLES,
+        SEO_DESCRIPTION,
+        SEO_TITLE,
         SITE_URL,
         SOCIAL_LINKS,
         TECHNICAL_SKILLS,
@@ -59,6 +64,9 @@ except ImportError:
         ABOUT_SUMMARY,
         CODE_SAMPLE,
         CV_HIGHLIGHTS,
+        HERO_BACKGROUND_URL,
+        PROFILE_IMAGE_URL,
+        css_url,
         DEVELOPER_NAME,
         DEVELOPER_NAME_SHORT,
         DEVELOPER_ROLE,
@@ -72,6 +80,8 @@ except ImportError:
         LOCATION,
         PHONE,
         ROLE_TITLES,
+        SEO_DESCRIPTION,
+        SEO_TITLE,
         SITE_URL,
         SOCIAL_LINKS,
         TECHNICAL_SKILLS,
@@ -143,7 +153,7 @@ def hero_section() -> Section:
     first_name, last_name = _hero_name_parts()
     return Section(
         Div(id="page-loader", cls="page-loader"),
-        Div(cls="hero-background"),
+        Div(cls="hero-background", style=f"--hero-background-image: url({css_url(HERO_BACKGROUND_URL)});"),
         Div(cls="hero-overlay"),
         Div(cls="hero-particles", id="hero-particles"),
         Container(
@@ -156,7 +166,7 @@ def hero_section() -> Section:
                             Span(last_name, cls="hero-name-last") if last_name else "",
                             cls="hero-name",
                         ),
-                        P(Span(ROLE_TITLES[0], id="hero-role"), cls="hero-role"),
+                        P(Span(ROLE_TITLES[0], id="hero-role", data_role_titles=json.dumps(ROLE_TITLES)), cls="hero-role"),
                         P(HERO_SUMMARY, cls="hero-summary"),
                         Div(
                             A("View My Work", href="#portfolio", cls="btn hero-primary-btn cta-pulse"),
@@ -180,20 +190,20 @@ def hero_section() -> Section:
                             Div(cls="hero-orb-ring hero-orb-ring-2"),
                             Div(cls="hero-orb-ring hero-orb-ring-3"),
                             Div(
-                                Img(src="/assets/images/me-photo.jpg", alt=DEVELOPER_NAME, cls="hero-avatar"),
+                                Img(src=PROFILE_IMAGE_URL, alt=DEVELOPER_NAME, cls="hero-avatar"),
                                 Div(cls="hero-avatar-glow"),
                                 cls="hero-avatar-shell tilt-card",
                             ),
                             cls="hero-orb-frame",
                         ),
                         Div(
-                            Span("10+", cls="hero-float-num"),
-                            Span("Projects", cls="hero-float-label"),
+                            Span(ABOUT_STATS[0].value if ABOUT_STATS else "", cls="hero-float-num"),
+                            Span(ABOUT_STATS[0].label if ABOUT_STATS else "", cls="hero-float-label"),
                             cls="hero-float-badge hero-float-badge-1",
                         ),
                         Div(
-                            Span("5+", cls="hero-float-num"),
-                            Span("Years Exp.", cls="hero-float-label"),
+                            Span(ABOUT_STATS[1].value if len(ABOUT_STATS) > 1 else "", cls="hero-float-num"),
+                            Span(ABOUT_STATS[1].label if len(ABOUT_STATS) > 1 else "", cls="hero-float-label"),
                             cls="hero-float-badge hero-float-badge-2",
                         ),
                         cls="hero-visual-shell",
@@ -592,11 +602,8 @@ def page_shell(active_filter: str, downloads: dict[str, int]) -> tuple[Any, ...]
     structured = Script(json.dumps(structured_data), type="application/ld+json")
     return (
         *PageMeta(
-            title=f"{DEVELOPER_NAME_SHORT} | Full-Stack & AI Systems Architect",
-            description=(
-                "Portfolio of Olorundare Micheal Babawale — Full-Stack & AI Systems Architect "
-                "from Ilorin, Nigeria. Building intelligent systems with FastAPI, FastHTML, and Python."
-            ),
+            title=SEO_TITLE or f"{DEVELOPER_NAME_SHORT} | {DEVELOPER_ROLE}",
+            description=SEO_DESCRIPTION or HERO_SUMMARY,
             keywords=KEYWORDS_GLOBAL,
             url=SITE_URL,
             twitter_creator="@evayoung",

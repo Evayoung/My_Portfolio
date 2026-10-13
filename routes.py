@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import time as _time
+import logging
 from pathlib import Path
 from typing import Any
 from urllib.parse import quote_plus
@@ -27,7 +28,12 @@ try:
         service_detail_fragment,
     )
     from .services.content_service import get_cv_meta, get_portfolio_filters, get_project, list_blog_posts, list_projects, list_services
-    from .services.submission_service import submit_booking_request, submit_contact_inquiry
+    from .services.submission_service import (
+        submit_booking_request,
+        submit_contact_inquiry,
+        validate_booking_submission,
+        validate_contact_submission,
+    )
 except ImportError:
     from ui.home import page_shell
     from ui.portfolio import portfolio_controls, portfolio_grid
@@ -45,9 +51,15 @@ except ImportError:
         service_detail_fragment,
     )
     from services.content_service import get_cv_meta, get_portfolio_filters, get_project, list_blog_posts, list_projects, list_services
-    from services.submission_service import submit_booking_request, submit_contact_inquiry
+    from services.submission_service import (
+        submit_booking_request,
+        submit_contact_inquiry,
+        validate_booking_submission,
+        validate_contact_submission,
+    )
 
 DOWNLOAD_COUNTS = {"pdf": 0, "web": 0, "print": 0}
+logger = logging.getLogger(__name__)
 
 # ── Rate limiting for form submissions ────────────────────────────────────────
 _FORM_SUBMISSIONS: dict[str, list[float]] = {}
@@ -68,8 +80,15 @@ def _check_rate_limit(ip: str) -> bool:
 
 
 def _get_client_ip(req) -> str:
-    """Extract client IP from request headers."""
-    return req.headers.get("x-forwarded-for", req.headers.get("x-real-ip", "127.0.0.1")).split(",")[0].strip()
+    """Use Vercel's overwritten client-IP header in production, socket peer locally."""
+    import os
+
+    if os.getenv("VERCEL"):
+        value = req.headers.get("x-forwarded-for") or req.headers.get("x-vercel-forwarded-for") or ""
+    else:
+        client = getattr(req, "client", None)
+        value = getattr(client, "host", "") or "127.0.0.1"
+    return value.split(",")[0].strip()[:64] or "unknown"
 
 
 def _cleanup_old_pdfs(tmp_dir: Path) -> None:
@@ -240,9 +259,13 @@ def setup_routes(app: Any, asset_dir: Path) -> None:
                 "Please fill in your name, email, and project brief before sending.",
                 tone="warning",
             )
+        validation_error = validate_contact_submission(name=name, email=email, subject=subject, message=message)
+        if validation_error:
+            return form_status_fragment("Check your message", validation_error, tone="warning")
         # Rate limiting
         client_ip = _get_client_ip(req)
         if not _check_rate_limit(client_ip):
+            logger.info("Public submission rate limited", extra={"submission_kind": "contact"})
             return form_status_fragment(
                 "Too many requests",
                 "You have sent too many messages recently. Please wait a few minutes before trying again.",
@@ -283,9 +306,15 @@ def setup_routes(app: Any, asset_dir: Path) -> None:
                 "Please share your name, email, and project description before continuing.",
                 tone="warning",
             )
+        validation_error = validate_booking_submission(
+            name=name, email=email, whatsapp=whatsapp, service=service, budget=budget, timeline=timeline, message=message,
+        )
+        if validation_error:
+            return form_status_fragment("Check your project brief", validation_error, tone="warning")
         # Rate limiting
         client_ip = _get_client_ip(req)
         if not _check_rate_limit(client_ip):
+            logger.info("Public submission rate limited", extra={"submission_kind": "booking"})
             return form_status_fragment(
                 "Too many requests",
                 "You have sent too many briefs recently. Please wait a few minutes before trying again.",
